@@ -3,7 +3,7 @@ local _, Addon = ...;
 Addon.CONFIG = CreateFrame( 'Frame' );
 Addon.CONFIG:RegisterEvent( 'ADDON_LOADED' );
 Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
-    if( AddonName == 'jPvPMap' ) then
+    if( AddonName == 'jMap' ) then
 
         --
         --  Get module settings

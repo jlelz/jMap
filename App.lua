@@ -3,7 +3,7 @@ local _, Addon = ...;
 Addon.APP = CreateFrame( 'Frame' );
 Addon.APP:RegisterEvent( 'ADDON_LOADED' );
 Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
-    if( AddonName == 'jPvPMap' ) then
+    if( AddonName == 'jMap' ) then
 
         --
         --  Set value
