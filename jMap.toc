@@ -10,7 +10,7 @@
 ## X-Wago-ID: QNlqea6e
 
 ## DefaultState: enabled
-## SavedVariables: jPvPMap
+## SavedVariables: jMap
 
 ## Interface: 110007
 ## Interface-Retail: 110005
