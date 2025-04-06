@@ -20,6 +20,15 @@ UI works with Classic Era, Classic Wrath and Retail
 https://github.com/jlelz/jMap/issues
 
 ## Screenshots
-<p float="left">
-  <img src="#" width="400" />
+<p float="center">
+  <img src="https://i.imgur.com/xoB1qOL.png" width="500" />
+</p>
+<p float="center">
+  <img src="https://i.imgur.com/x7oF5mr.png" width="500" />
+</p>
+<p float="center">
+  <img src="https://i.imgur.com/k3o8NIp.png" width="500" />
+</p>
+<p float="center">
+  <img src="https://i.imgur.com/SZ1U0e1.png" width="500" />
 </p>
