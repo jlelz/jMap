@@ -48,11 +48,15 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 if( InCombatLockdown() ) then
                     return;
                 end
-                if( Event == 'PLAYER_STARTED_MOVING' or Event == 'PLAYER_STARTED_LOOKING' or Event == 'PLAYER_STARTED_TURNING' ) then
+                if( Event ) then
                     WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
                     Addon.APP:Ping();
-                    if( not WorldMapFrame:IsShown() and Addon.APP:GetValue( 'AlwaysShow' ) ) then
-                        WorldMapFrame:Show();
+                    if( Addon.APP:HasMap() ) then
+                        if( not WorldMapFrame:IsShown() and Addon.APP:GetValue( 'AlwaysShow' ) ) then
+                            WorldMapFrame:Show();
+                        end
+                    else
+                        WorldMapFrame:Hide();
                     end
                 end
                 Addon.APP:UpdateZone();
@@ -401,6 +405,17 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             --WorldMapFrame:ResetZoom();
         end
 
+        Addon.APP.HasMap = function( self )
+            if( Addon:IsVanilla() ) then
+                local Instanced,InstanceType = IsInInstance();
+                print( type( Instanced ),Instanced )
+                if( Instanced ) then
+                    return false;
+                end
+            end
+            return true;
+        end
+
         --
         --  Module refresh
         --
@@ -426,7 +441,11 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
 
             -- Map Show
             if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
-                WorldMapFrame:Show();
+                if( self:HasMap() ) then
+                    WorldMapFrame:Show();
+                else
+                    WorldMapFrame:Hide();
+                end
             end
 
             -- Map Zone
