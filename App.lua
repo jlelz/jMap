@@ -48,16 +48,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 if( InCombatLockdown() ) then
                     return;
                 end
-                --[[
-                local InInstance,InstanceType = IsInInstance();
-                if( InInstance ) then
-                    if( Addon.APP:GetValue( 'CloseWhileInstanced' ) ) then
-                        if( WorldMapFrame:IsShown() ) then
-                            WorldMapFrame:Hide();
-                        end
-                    end
-                end
-                ]]
                 if( Event == 'PLAYER_STARTED_MOVING' or Event == 'PLAYER_STARTED_LOOKING' or Event == 'PLAYER_STARTED_TURNING' ) then
                     WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
                     Addon.APP:Ping();
