@@ -408,7 +408,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         Addon.APP.HasMap = function( self )
             if( Addon:IsVanilla() ) then
                 local Instanced,InstanceType = IsInInstance();
-                print( type( Instanced ),Instanced )
                 if( Instanced ) then
                     return false;
                 end
