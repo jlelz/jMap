@@ -64,6 +64,13 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     self:SetPosition();
                     --self:UpdateZone();
                 end
+
+                if( WorldMapFrame:IsMaximized() ) then
+                    if( WorldMapFrame:GetScale() ~= 1 ) then
+                        WorldMapFrame:SetScale( 1 );
+                    end
+                end 
+
                 if( self:GetValue( 'Debug' ) ) then
                     Addon.FRAMES:Debug( 'WorldMapFrame','SynchronizeDisplayState' );
                 end
@@ -234,8 +241,8 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.WorldMapFrameStartMoving = function( self )
-            if not WorldMapFrame:IsMaximized() then
-                WorldMapFrame:StartMoving()
+            if( not WorldMapFrame:IsMaximized() ) then
+                WorldMapFrame:StartMoving();
             end
         end
 
