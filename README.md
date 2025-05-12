@@ -21,7 +21,7 @@ https://github.com/jlelz/jMap/issues
 
 ## Screenshots
 <p float="center">
-  <img src="https://i.imgur.com/xoB1qOL.png" width="500" />
+  <img src="https://i.imgur.com/WJ11RTj.png" width="500" />
 </p>
 <p float="center">
   <img src="https://i.imgur.com/x7oF5mr.png" width="500" />
