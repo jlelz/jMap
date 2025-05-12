@@ -109,11 +109,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             -- /Blizzard_FrameXMLBase/PlayerMovementFrameFader.lua
             PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
 
-            local FrameFaderDriver = CreateFrame( 'Frame',nil,WorldMapFrame );
-            FrameFaderDriver:SetScript( 'OnUpdate',function( self,Elapsed )
-                if( Addon.APP:GetValue( 'MapFade' ) ) then
-                    return;
-                end
+            WorldMapFrame:HookScript( 'OnUpdate', function()
                 if( not WorldMapFrame:IsMouseOver() ) then
                     WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
                 else
