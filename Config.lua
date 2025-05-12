@@ -90,14 +90,6 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                     arg = 'MapScale',
                 };
                 Order = Order+1;
-                Settings.MapFade = {
-                    order = Order,
-                    type = 'toggle',
-                    name = 'Map Fading',
-                    desc = 'If the map should respect the fader',
-                    arg = 'MapFade',
-                };
-                Order = Order+1;
                 Settings.ScrollScale = {
                     order = Order,
                     type = 'toggle',

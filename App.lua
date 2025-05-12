@@ -105,10 +105,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             end
             ]]
 
-            -- Fading
-            -- /Blizzard_FrameXMLBase/PlayerMovementFrameFader.lua
-            PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
-
             WorldMapFrame:HookScript( 'OnUpdate', function()
                 if( not WorldMapFrame:IsMouseOver() ) then
                     WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
@@ -419,9 +415,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             if( not WorldMapFrame ) then
                 return;
             end
-
-            -- Map Opacity
-            WorldMapFrame:SetAlpha( self:GetValue( 'MapAlpha' ) );
 
             -- Map Scale
             self:SetScale();
