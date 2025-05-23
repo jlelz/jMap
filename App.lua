@@ -49,7 +49,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     return;
                 end
                 if( Event ) then
-                    WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
+                    --WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
                     Addon.APP:Ping();
                     if( Addon.APP:HasMap() ) then
                         if( not WorldMapFrame:IsShown() and Addon.APP:GetValue( 'AlwaysShow' ) ) then
@@ -88,6 +88,19 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 end
                 self:SetPosition();
                 self:UpdateZone();
+
+                local function OnUpdate( self,Elapsed )
+                    local FadeOut = not Map:IsMouseOver();
+                    local Setting = {
+                        MinAlpha = Addon.APP:GetValue( 'MapAlpha' ),
+                        MaxAlpha = 1,
+                        TimeToMax = .1,
+                    };
+                    Map:SetAlpha( DeltaLerp( Map:GetAlpha(),FadeOut and Setting.MinAlpha or Setting.MaxAlpha,Setting.TimeToMax,Elapsed ) );
+                end
+                FrameFaderDriver = CreateFrame( 'FRAME',nil,Map );
+                FrameFaderDriver:SetScript( 'OnUpdate',OnUpdate );
+                PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
             end );
 
             --[[
@@ -104,14 +117,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 WorldMapFrame.Nav.Texture:SetColorTexture( r,g,b,a );
             end
             ]]
-
-            WorldMapFrame:HookScript( 'OnUpdate', function()
-                if( not WorldMapFrame:IsMouseOver() ) then
-                    WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
-                else
-                    WorldMapFrame:SetAlpha( 1 );
-                end
-            end );
 
             -- Zooming/Scaling
             local SliderData = {
