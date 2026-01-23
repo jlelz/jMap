@@ -1,5 +1,5 @@
-## Title: |cff009bffj|cffffffffPvPMap|r
-## Notes: j's PvP Map mod
+## Title: |cff009bffj|cffffffffMap|r
+## Notes: j's Map mod
 ## Version: @project-version@
 ## X-Category: system
 
@@ -12,7 +12,7 @@
 ## DefaultState: enabled
 ## SavedVariables: jMap
 
-## Interface: 110207
+## Interface: 120000
 ## Interface-Classic: 11507
 ## Interface-BCC: 20504
 ## Interface-Wrath: 30403

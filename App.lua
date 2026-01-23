@@ -474,10 +474,10 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             WorldMapFrame:SetScript( 'OnDragStop',self.WorldMapFrameStopMoving );
 
             -- Emotes
-            hooksecurefunc( 'DoEmote',function( Emote )
+            hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
                 if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
                     if( Addon.APP:GetValue( 'StopReading' ) ) then
-                        CancelEmote();
+                        C_ChatInfo.CancelEmote();
                     end
                 end
             end );
