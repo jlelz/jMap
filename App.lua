@@ -472,6 +472,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             if( not WorldMapFrame ) then
                 return;
             end
+            self.Name = AddonName;
 
             -- Position
             WorldMapFrame:SetMovable( true );
@@ -504,9 +505,20 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             ]]
             
             -- Slash command
-            SLASH_JMAP1, SLASH_JMAP2 = '/jm', '/jpm';
+            local Category,Layout;
+            if( Settings and Settings.RegisterCanvasLayoutCategory ) then
+                Category,Layout = Settings.RegisterCanvasLayoutCategory( Addon.CONFIG.Config,self.Name );
+                Settings.RegisterAddOnCategory( Category );
+            end
+
+            SLASH_JMAP1, SLASH_JMAP2 = '/jm', '/jmap';
             SlashCmdList['JMAP'] = function( Msg,EditBox )
-                Settings.OpenToCategory( 'jMap' );
+                if( InterfaceOptionsFrame_OpenToCategory ) then
+                    InterfaceOptionsFrame_OpenToCategory( self.Name );
+                    InterfaceOptionsFrame_OpenToCategory( self.Name );
+                else
+                    Settings.OpenToCategory( Category.ID );
+                end
             end
         end
 
