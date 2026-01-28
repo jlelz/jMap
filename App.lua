@@ -64,6 +64,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
 
             -- Display
             LibStub( 'AceHook-3.0' ):SecureHook( WorldMapFrame,'SynchronizeDisplayState',function()
+                if InCombatLockdown() then return end;
                 if( not( WorldMapFrame:IsMaximized() ) ) then
                     self:SetPosition();
                     --self:UpdateZone();
@@ -82,6 +83,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
 
             -- Show
             LibStub( 'AceHook-3.0' ):SecureHookScript( WorldMapFrame,'OnShow',function( Map )
+                if InCombatLockdown() then return end;
                 local PreviousZone = C_Map.GetBestMapForUnit( 'player' );
                 if( PreviousZone ) then
                     self.PreviousZone = PreviousZone;
@@ -146,6 +148,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             } );
             -- Cause map zooming to control the slider
             WorldMapFrame.ScrollContainer:HookScript( 'OnMouseWheel',function( self,Value )
+                if InCombatLockdown() then return end;
                 if( not Addon.APP:GetValue( 'ScrollScale' ) ) then
                     return;
                 end
@@ -252,6 +255,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.SetPosition = function( self )
+            if InCombatLockdown() then return end;
             if( not( WorldMapFrame:IsMaximized() ) ) then
                 local MapPoint,MapXPos,MapYPos = self:GetValue( 'MapPoint' ),self:GetValue( 'MapXPos' ),self:GetValue( 'MapYPos' );
                 if( MapXPos ~= nil and MapYPos ~= nil ) then
@@ -271,7 +275,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     
                     WorldMapFrame:ClearAllPoints();
                     WorldMapFrame:SetPoint( MapPoint,MapXPos,MapYPos );
-                    WorldMapFrame:SetScale( self:GetValue( 'MapScale' ) );
+                    self:SetScale();
                 end
             end
         end
@@ -289,6 +293,8 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.SetScale = function( self )
+            if InCombatLockdown() then return end;
+
             WorldMapFrame:SetScale( self:GetValue( 'MapScale' ) );
         end
 
