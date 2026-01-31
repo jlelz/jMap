@@ -252,24 +252,19 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
         --  @return void
         Addon.CONFIG.Init = function( self,Instance )
 
-            -- Register
-            self.Config = LibStub( 'AceConfigDialog-3.0' ):AddToBlizOptions( 'jMap','jMap' );
-            LibStub( 'AceConfigRegistry-3.0' ):RegisterOptionsTable( 'jMap',self:GetSettings( Instance ) );
+            -- Initialize window
+            local _, CategoryID = LibStub( 'AceConfigDialog-3.0' ):AddToBlizOptions( AddonName,AddonName );
+            LibStub( 'AceConfigRegistry-3.0' ):RegisterOptionsTable( AddonName,self:GetSettings() );
 
-            hooksecurefunc( self.Config,'OnCommit',function()
-                -- handle like window close...
-                --print( 'OnCommit...' );
-            end );
-
-            hooksecurefunc( self.Config,'OnRefresh',function()
-                -- handle like window open...
-                --print( 'OnRefresh...' );
-            end );
-
-            hooksecurefunc( self.Config,'OnDefault',function()
-                --print( 'OnDefault' );
-                --Addon.CHAT.db:ResetDB();
-            end );
+            SLASH_JMAP1, SLASH_JMAP2 = '/jm', '/jmap';
+            SlashCmdList[ string.upper( AddonName ) ] = function( Msg,EditBox )
+                if( InterfaceOptionsFrame_OpenToCategory ) then
+                    InterfaceOptionsFrame_OpenToCategory( AddonName );
+                    InterfaceOptionsFrame_OpenToCategory( AddonName );
+                else
+                    Settings.OpenToCategory( CategoryID );
+                end
+            end
         end
 
         self:UnregisterEvent( 'ADDON_LOADED' );
