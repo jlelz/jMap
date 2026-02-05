@@ -201,8 +201,8 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                 set = function( Info,Value )
                     if( Addon.DB:GetPersistence()[ Info.arg ] ~= nil ) then
                         Addon.DB:GetPersistence()[ Info.arg ] = Value;
-                        if( Instance.Refresh ) then
-                            Instance:Refresh();
+                        if( Addon.APP.Refresh ) then
+                            Addon.APP:Refresh();
                         end
                     end
                 end,
