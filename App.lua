@@ -542,7 +542,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         end
 
         Addon.DB:Init();
-        Addon.CONFIG:Init( self );
+        Addon.CONFIG:Init();
 
         self:Init();
         self:CreateFrames();

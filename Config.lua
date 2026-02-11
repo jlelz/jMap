@@ -9,7 +9,7 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
         --  Get module settings
         --
         --  @return table
-        Addon.CONFIG.GetSettings = function( self,Instance )
+        Addon.CONFIG.GetSettings = function( self )
             local GetMiniMap = function()
                 local Order = 1;
                 local Settings = {
@@ -250,7 +250,7 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
         --  Create module config frames
         --
         --  @return void
-        Addon.CONFIG.Init = function( self,Instance )
+        Addon.CONFIG.Init = function( self )
 
             -- Initialize window
             local _, CategoryID = LibStub( 'AceConfigDialog-3.0' ):AddToBlizOptions( AddonName,AddonName );
