@@ -434,6 +434,9 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     return false;
                 end
             end
+            if( C_Housing and C_Housing.IsInsideHouse() ) then
+                return false;
+            end
             return true;
         end
 
