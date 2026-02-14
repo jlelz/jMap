@@ -149,7 +149,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     print( 'Set',Index,Value)
                     --return self:SetValue( 'MapScale',Value );
                 end,
-            } );
+            },Addon.Theme.Text );
             -- Cause map zooming to control the slider
             LibStub( 'AceHook-3.0' ):SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel',function( self,Value )
                 if( InCombatLockdown() ) then
@@ -505,28 +505,23 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             WorldMapFrame:SetScript( 'OnDragStop',self.WorldMapFrameStopMoving );
 
             -- Emotes
-            hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
-                if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
-                    if( Addon.APP:GetValue( 'StopReading' ) ) then
-                        C_ChatInfo.CancelEmote();
+            if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
+                hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
+                    if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
+                        if( Addon.APP:GetValue( 'StopReading' ) ) then
+                            C_ChatInfo.CancelEmote();
+                        end
                     end
-                end
-            end );
-
-            -- SetPassThroughButtons
-            --[[
-            hooksecurefunc( WorldMapFrame,'AcquirePin',function( PinTemplate,... )
-                if( not WorldMapFrame.pinPools[ PinTemplate ] ) then
-                    local pinTemplateType = WorldMapFrame.pinTemplateTypes[ PinTemplate ] or 'FRAME';
-                    WorldMapFrame.pinPools[ PinTemplate ] = CreateFramePool( pinTemplateType,WorldMapFrame:GetCanvas(),PinTemplate,OnPinReleased );
-                end
-
-                local pin,newPin = WorldMapFrame.pinPools[ PinTemplate ]:Acquire();
-                if( pin.SetPassThroughButtons ) then
-                    pin.SetPassThroughButtons = nil;
-                end
-            end );
-            ]]
+                end );
+            else
+                hooksecurefunc( 'DoEmote',function( Emote )
+                    if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
+                        if( Addon.APP:GetValue( 'StopReading' ) ) then
+                            C_ChatInfo.CancelEmote();
+                        end
+                    end
+               end );
+            end
         end
 
         --
