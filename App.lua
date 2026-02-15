@@ -149,7 +149,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     print( 'Set',Index,Value)
                     --return self:SetValue( 'MapScale',Value );
                 end,
-            },Addon.Theme.Text );
+            },Addon.Theme.Text.Colors.Default );
             -- Cause map zooming to control the slider
             LibStub( 'AceHook-3.0' ):SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel',function( self,Value )
                 if( InCombatLockdown() ) then
