@@ -517,7 +517,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 hooksecurefunc( 'DoEmote',function( Emote )
                     if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
                         if( Addon.APP:GetValue( 'StopReading' ) ) then
-                            C_ChatInfo.CancelEmote();
+                            DoEmote( 'STAND' );
                         end
                     end
                end );
