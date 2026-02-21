@@ -28,38 +28,25 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.CreateFrames = function( self )
-            local WorldMapUnitPin = self:GetUnitPin();
+            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
             if( not WorldMapUnitPin ) then
                 return;
             end
 
-            -- Events
             self.Events = CreateFrame( 'Frame' );
-
-            -- Movement
-            self.Events:RegisterEvent( 'PLAYER_STARTED_MOVING' );
-            self.Events:RegisterEvent( 'PLAYER_STARTED_LOOKING' );
-            self.Events:RegisterEvent( 'PLAYER_STARTED_TURNING' );
-
             self.Events:RegisterEvent( 'ZONE_CHANGED_NEW_AREA' );
             self.Events:RegisterEvent( 'ZONE_CHANGED' );
             self.Events:RegisterEvent( 'ZONE_CHANGED_INDOORS' );
-            self.Events:SetScript( 'OnEvent',function( self,Event,... )
+            self.Events:HookScript( 'OnEvent',function( self,Event,... )
                 if( InCombatLockdown() ) then
                     return;
                 end
-                if( Event ) then
-                    --WorldMapFrame:SetAlpha( Addon.APP:GetValue( 'MapAlpha' ) );
-                    Addon.APP:Ping();
-                    if( Addon.APP:HasMap() ) then
-                        if( not WorldMapFrame:IsShown() and Addon.APP:GetValue( 'AlwaysShow' ) ) then
-                            WorldMapFrame:Show();
-                        end
-                    else
-                        WorldMapFrame:Hide();
-                    end
+                if( not Event ) then
+                    return;
                 end
-                Addon.APP:UpdateZone();
+                if( string.find( Event,'ZONE_CHANGED' ) ) then
+                    Addon.APP:UpdateWorldMapFrameZone();
+                end
             end );
 
             -- Display
@@ -68,14 +55,11 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     return;
                 end
                 if( not( WorldMapFrame:IsMaximized() ) ) then
-                    self:SetPosition();
-                    --self:UpdateZone();
+                    self:WorldMapSetPosition();
                 end
 
                 if( WorldMapFrame:IsMaximized() ) then
-                    if( WorldMapFrame:GetScale() ~= 1 ) then
-                        WorldMapFrame:SetScale( 1 );
-                    end
+                    self:WorldMapFrameSetScale();
                 end 
 
                 if( self:GetValue( 'Debug' ) ) then
@@ -92,8 +76,8 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 if( PreviousZone ) then
                     self.PreviousZone = PreviousZone;
                 end
-                self:SetPosition();
-                self:UpdateZone();
+                self:WorldMapSetPosition();
+                self:UpdateWorldMapFrameZone();
 
                 local function OnUpdate( self,Elapsed )
                     local FadeOut = not Map:IsMouseOver();
@@ -105,7 +89,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     Map:SetAlpha( DeltaLerp( Map:GetAlpha(),FadeOut and Setting.MinAlpha or Setting.MaxAlpha,Setting.TimeToMax,Elapsed ) );
                 end
                 FrameFaderDriver = CreateFrame( 'FRAME',nil,Map );
-                FrameFaderDriver:SetScript( 'OnUpdate',OnUpdate );
+                FrameFaderDriver:HookScript( 'OnUpdate',OnUpdate );
                 PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
             end );
 
@@ -187,9 +171,9 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 if( NewValue ~= nil ) then
                     RangeSlider.EditBox:SetText( NewValue );
                     Addon.APP:SetValue( SliderData.Name,NewValue );
-                    Addon.APP:SetScale();
+                    Addon.APP:WorldMapFrameSetScale();
                 end
-                local WorldMapUnitPin = Addon.APP:GetUnitPin();
+                local WorldMapUnitPin = Addon.APP:GetWorldMapFrameUnitPin();
                 if( not WorldMapUnitPin ) then
                     return;
                 end
@@ -265,11 +249,21 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             end
         end
 
+        Addon.APP.WorldMapFrameCheckShown = function( self )
+            if( self:HasMap() ) then
+                if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
+                    WorldMapFrame:Show();
+                end
+            else
+                WorldMapFrame:Hide();
+            end
+        end
+
         --
         --  Map save position
         --
         --  @return void
-        Addon.APP.SetPosition = function( self )
+        Addon.APP.WorldMapSetPosition = function( self )
             if( InCombatLockdown() ) then
                 return;
             end
@@ -287,12 +281,12 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                             MapYPos = MapYPos, 
                         } );
 
-                        Addon.FRAMES:Debug( 'Addon.APP','SetPosition' );
+                        Addon.FRAMES:Debug( 'Addon.APP','WorldMapSetPosition' );
                     end
                     
                     WorldMapFrame:ClearAllPoints();
                     WorldMapFrame:SetPoint( MapPoint,MapXPos,MapYPos );
-                    self:SetScale();
+                    self:WorldMapFrameSetScale();
                 end
             end
         end
@@ -309,7 +303,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --  Map save scale
         --
         --  @return void
-        Addon.APP.SetScale = function( self )
+        Addon.APP.WorldMapFrameSetScale = function( self )
             if( InCombatLockdown() ) then
                 return;
             end
@@ -321,7 +315,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         -- Get Map Unit Pin
         --
         -- @return  mixed
-        Addon.APP.GetUnitPin = function( self )
+        Addon.APP.GetWorldMapFrameUnitPin = function( self )
             local WorldMapUnitPin;
             for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
                 WorldMapUnitPin = pin
@@ -337,13 +331,13 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         -- Update Map Unit Pin Colors
         --
         -- @return  mixed
-        Addon.APP.UpdatePinColors = function( self )
-            local WorldMapUnitPin = Addon.APP:GetUnitPin();
+        Addon.APP.UpdateWorldMapFramePinColors = function( self )
+            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
             if( not WorldMapUnitPin ) then
                 return;
             end
             if( Addon.APP:GetValue( 'Debug' ) ) then
-                Addon.FRAMES:Debug( 'UpdatePinColors call' );
+                Addon.FRAMES:Debug( 'UpdateWorldMapFramePinColors call' );
             end
 
             local PinColor = Addon.APP:GetValue( 'SkullMyAss' );
@@ -386,11 +380,11 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         -- Animate Map Unit Pin
         --
         -- @return  void
-        Addon.APP.Ping = function( self )
+        Addon.APP.WorldMapFramePing = function( self )
             if( InCombatLockdown() ) then
                 return;
             end
-            local WorldMapUnitPin = self:GetUnitPin();
+            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
             if( not WorldMapUnitPin ) then
                 return;
             end
@@ -406,8 +400,8 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         -- Map Zone Update
         --
         -- @return  void
-        Addon.APP.UpdateZone = function( self )
-            if( not Addon.APP:GetValue( 'UpdateZone' ) ) then
+        Addon.APP.UpdateWorldMapFrameZone = function( self )
+            if( not Addon.APP:GetValue( 'UpdateWorldMapFrameZone' ) ) then
                 return;
             end
             if( InCombatLockdown() ) then
@@ -451,9 +445,11 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             if( not WorldMapFrame ) then
                 return;
             end
+            
+            Addon.FRAMES:Notify( 'Refreshing all settings...' );
 
             -- Map Scale
-            self:SetScale();
+            self:WorldMapFrameSetScale();
 
             -- Map Strata
             local DefaultStrata = WorldMapFrame:GetFrameStrata();
@@ -464,29 +460,26 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             end
 
             -- Map Show
-            if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
-                if( self:HasMap() ) then
-                    WorldMapFrame:Show();
-                else
-                    WorldMapFrame:Hide();
-                end
-            end
+            self:WorldMapFrameCheckShown()
 
             -- Map Zone
-            self:UpdateZone();
+            self:UpdateWorldMapFrameZone();
 
-            -- Pin Color
-            self:UpdatePinColors();
+            -- Map Pin Color
+            self:UpdateWorldMapFramePinColors();
 
             -- CVars
             self:SetCVars();
 
-            -- Pin Size
-            local WorldMapUnitPin = self:GetUnitPin();
+            self:WorldMapFramePing();
+
+            -- Map Pin Size
+            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
             if( not WorldMapUnitPin ) then
                 return;
             end
             WorldMapUnitPin:SynchronizePinSizes();
+            Addon.FRAMES:Notify( 'Done' );
         end
 
         --
@@ -501,8 +494,8 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             -- Position
             WorldMapFrame:SetMovable( true );
             WorldMapFrame:RegisterForDrag( 'LeftButton' );
-            WorldMapFrame:SetScript( 'OnDragStart',self.WorldMapFrameStartMoving );
-            WorldMapFrame:SetScript( 'OnDragStop',self.WorldMapFrameStopMoving );
+            WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
+            WorldMapFrame:HookScript( 'OnDragStop',self.WorldMapFrameStopMoving );
 
             -- Emotes
             if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
@@ -517,7 +510,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 hooksecurefunc( 'DoEmote',function( Emote )
                     if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
                         if( Addon.APP:GetValue( 'StopReading' ) ) then
-                            DoEmote( 'STAND' );
+                            CancelEmote();
                         end
                     end
                end );
@@ -533,9 +526,10 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 return;
             end
 
+            Addon.FRAMES:Notify( 'Prepping...please wait' );
             C_Timer.After( 2, function()
                self:Refresh();
-               self:Ping();
+               self:WorldMapFramePing();
             end );
         end
 

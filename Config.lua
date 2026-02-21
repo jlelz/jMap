@@ -142,16 +142,30 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                     name = 'Animation',
                     desc = 'Pin animation',
                     arg = 'PinPing',
+                    set = function( Info,Value )
+                        if( Addon.DB:GetPersistence()[ Info.arg ] ~= nil ) then
+                            Addon.DB:GetPersistence()[ Info.arg ] = Value;
+                            if( Addon.APP.Refresh ) then
+                                Addon.APP:Refresh();
+                            end
+                        end
+                        if( Value ) then
+                            self.Ticker = C_Timer.NewTicker( Addon.APP:GetValue( 'PinPingSeconds' ),function()
+                                Addon.APP:WorldMapFramePing();
+                            end );
+                        else
+                            self.Ticker:Cancel();
+                        end
+                    end,
                 };
                 Order = Order+1;
                 Settings.PinAnimDuration = {
                     order = Order,
                     type = 'range',
                     name = 'Animation Duration',
-                    desc = 'Pin animation duration',
+                    desc = 'Pin ping animation duration',
                     min = 10, max = 120, step = 10,
                     arg = 'PinAnimDuration',
-                    disabled = not Addon.DB:GetValue( 'PinPing' ),
                 };
                 Order = Order+1;
                 Settings.SkullMyAss = {
@@ -265,6 +279,10 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                     Settings.OpenToCategory( CategoryID );
                 end
             end
+
+            self.Ticker = C_Timer.NewTicker( Addon.APP:GetValue( 'PinPingSeconds' ),function()
+                Addon.APP:WorldMapFramePing();
+            end );
         end
 
         self:UnregisterEvent( 'ADDON_LOADED' );

@@ -23,8 +23,9 @@ Addon.DB:SetScript( 'OnEvent',function( self,Event,AddonName )
                 MiniRotate = true,
 
                 PinAnimDuration = 90,
-                PinAnimScale = 3,
+                PinAnimScale = 1.5,
                 PinPing = true,
+                PinPingSeconds = 10,
                 SkullMyAss = 'Pink',
                 MatchWorldScale = true,
                 ClassColors = false,
