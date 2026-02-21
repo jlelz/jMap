@@ -33,7 +33,7 @@ Addon.DB:SetScript( 'OnEvent',function( self,Event,AddonName )
                 PanelColapsed = true,
                 StopReading = true,
                 SitBehind = false,
-                UpdateZone = true,
+                UpdateWorldMapFrameZone = true,
                 ScrollScale = true,
                 Debug = false,
             };

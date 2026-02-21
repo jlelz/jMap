@@ -65,12 +65,12 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                     arg = 'SitBehind',
                 };
                 Order = Order+1;
-                Settings.UpdateZone = {
+                Settings.UpdateWorldMapFrameZone = {
                     order = Order,
                     type = 'toggle',
                     name = 'Auto Update Zone',
                     desc = 'Attempt to transition map to new zone automatically. Retail has known issues with this, as it seems to cause some errors',
-                    arg = 'UpdateZone',
+                    arg = 'UpdateWorldMapFrameZone',
                 };
                 Order = Order+1;
                 Settings.StopReading = {
