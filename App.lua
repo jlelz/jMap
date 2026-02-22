@@ -179,7 +179,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 WorldMapUnitPin:SynchronizePinSizes();
             end );
 
-            WorldMapUnitPin:SetFrameStrata( 'TOOLTIP' );
+            --WorldMapUnitPin:SetFrameStrata( 'TOOLTIP' );
             
             -- Interface/AddOns/Blizzard_SharedMapDataProviders/GroupMembersDataProvider.lua
             LibStub( 'AceHook-3.0' ):SecureHook( WorldMapUnitPin,'SynchronizePinSizes',function( self )
@@ -190,7 +190,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 for unit, size in self.dataProvider:EnumerateUnitPinSizes() do
                     if( Addon:IsClassic() and unit == 'player' ) then
                         size = size+10;
-                        self:SetFrameStrata( 'TOOLTIP' );
+                        --self:SetFrameStrata( 'TOOLTIP' );
                     end
                     if self.dataProvider:ShouldShowUnit(unit) then
                         self:SetPinSize(unit, size / scale);
