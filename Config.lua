@@ -281,6 +281,7 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
             end
 
             self.Ticker = C_Timer.NewTicker( Addon.APP:GetValue( 'PinPingSeconds' ),function()
+                Addon.APP:WorldMapFrameCheckShown();
                 Addon.APP:WorldMapFramePing();
             end );
         end

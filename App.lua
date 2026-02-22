@@ -44,9 +44,8 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 if( not Event ) then
                     return;
                 end
-                if( string.find( Event,'ZONE_CHANGED' ) ) then
-                    Addon.APP:UpdateWorldMapFrameZone();
-                end
+                Addon.APP:WorldMapFrameCheckShown();
+                Addon.APP:UpdateWorldMapFrameZone();
             end );
 
             -- Display
@@ -460,7 +459,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             end
 
             -- Map Show
-            self:WorldMapFrameCheckShown()
+            self:WorldMapFrameCheckShown();
 
             -- Map Zone
             self:UpdateWorldMapFrameZone();
@@ -471,6 +470,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             -- CVars
             self:SetCVars();
 
+            -- Map Ping
             self:WorldMapFramePing();
 
             -- Map Pin Size
