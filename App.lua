@@ -515,6 +515,22 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     end
                end );
             end
+
+            -- nop passthroughNonSense
+            -- https://discord.com/channels/327414731654692866/327533449164488706/1441596995696332891
+            local pinTemplates={}
+            hooksecurefunc(WorldMapFrame,"AcquirePin",function(self,pinTemplate)
+                pinTemplates[pinTemplate]=true
+            end)
+
+            function hookPoolReset(pool, region)
+                --no map pin SetPassThroughButtons
+                if pool and pinTemplates[pool:GetTemplate()] then
+                    region.SetPassThroughButtons=nop
+                    region.SetPropagateMouseClicks=nop
+                end
+            end
+            hooksecurefunc("Pool_HideAndClearAnchors",hookPoolReset)
         end
 
         --
