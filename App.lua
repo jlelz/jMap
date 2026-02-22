@@ -501,7 +501,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
                 hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
                     if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
-                        if( Addon.APP:GetValue( 'StopReading' ) ) then
+                        if( self:GetValue( 'StopReading' ) ) then
                             C_ChatInfo.CancelEmote();
                         end
                     end
@@ -509,7 +509,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             else
                 hooksecurefunc( 'DoEmote',function( Emote )
                     if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
-                        if( Addon.APP:GetValue( 'StopReading' ) ) then
+                        if( self:GetValue( 'StopReading' ) ) then
                             CancelEmote();
                         end
                     end
@@ -530,7 +530,11 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     region.SetPropagateMouseClicks=nop
                 end
             end
-            hooksecurefunc("Pool_HideAndClearAnchors",hookPoolReset)
+            LibStub( 'AceHook-3.0' ):SecureHook("Pool_HideAndClearAnchors",hookPoolReset);
+
+            hooksecurefunc( 'MoveForwardStart',function()
+                self:UpdateWorldMapFrameZone();
+            end );
         end
 
         --
