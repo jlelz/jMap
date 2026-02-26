@@ -266,7 +266,7 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
             SLASH_JMAP1, SLASH_JMAP2 = '/jm', '/jmap';
             SlashCmdList[ string.upper( AddonName ) ] = function( Msg,EditBox )
                 if( InCombatLockdown() ) then
-                    Addon.FRAMES:Error( 'You are in combat' );
+                    Addon.FRAMES:Error( 'You are in combat' );return;
                 end
                 if( InterfaceOptionsFrame_OpenToCategory ) then
                     InterfaceOptionsFrame_OpenToCategory( AddonName );

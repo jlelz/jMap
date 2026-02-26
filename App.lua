@@ -220,7 +220,9 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         Addon.APP.WorldMapFrameCheckShown = function( self )
             if( self:HasMap() ) then
                 if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
-                    WorldMapFrame:Show();
+                    if( not self.WorldMapFrameClosed ) then
+                        WorldMapFrame:Show();
+                    end
                 end
             else
                 WorldMapFrame:Hide();
@@ -467,6 +469,21 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                 WorldMapUnitPin = pin
                 break;
             end
+            LibStub( 'AceHook-3.0' ):SecureHook( WorldMapUnitPin,'OnAcquired',function()
+                print( 'here' )
+            end );
+
+            local FuckBlizzTaints = CreateFrame( 'Frame' );
+            FuckBlizzTaints:RegisterEvent( 'PLAYER_REGEN_DISABLED' );
+            FuckBlizzTaints:RegisterEvent( 'PLAYER_REGEN_ENABLED' );
+            FuckBlizzTaints:SetScript( 'OnEvent',function( _,Event )
+                if( Event  == 'PLAYER_REGEN_DISABLED' ) then
+                    WorldMapFrame:Hide();
+                    self.WorldMapFrameClosed = true;
+                else
+                    self.WorldMapFrameClosed = false;
+                end
+            end );
         end
 
         Addon.DB:Init();
