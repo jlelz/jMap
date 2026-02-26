@@ -4,6 +4,7 @@ Addon.APP = CreateFrame( 'Frame' );
 Addon.APP:RegisterEvent( 'ADDON_LOADED' );
 Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
     if( AddonName == 'jMap' ) then
+        local WorldMapUnitPin;
 
         --
         --  Set value
@@ -28,31 +29,19 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.CreateFrames = function( self )
-            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
-            if( not WorldMapUnitPin ) then
-                return;
-            end
-
             self.Events = CreateFrame( 'Frame' );
             self.Events:RegisterEvent( 'ZONE_CHANGED_NEW_AREA' );
             self.Events:RegisterEvent( 'ZONE_CHANGED' );
             self.Events:RegisterEvent( 'ZONE_CHANGED_INDOORS' );
             self.Events:HookScript( 'OnEvent',function( self,Event,... )
-                if( InCombatLockdown() ) then
-                    return;
-                end
                 if( not Event ) then
                     return;
                 end
-                Addon.APP:WorldMapFrameCheckShown();
                 Addon.APP:UpdateWorldMapFrameZone();
             end );
 
             -- Display
             LibStub( 'AceHook-3.0' ):SecureHook( WorldMapFrame,'SynchronizeDisplayState',function()
-                if( InCombatLockdown() ) then
-                    return;
-                end
                 if( not( WorldMapFrame:IsMaximized() ) ) then
                     self:WorldMapSetPosition();
                 end
@@ -68,9 +57,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
 
             -- Show
             LibStub( 'AceHook-3.0' ):SecureHookScript( WorldMapFrame,'OnShow',function( Map )
-                if( InCombatLockdown() ) then
-                    return;
-                end
                 local PreviousZone = C_Map.GetBestMapForUnit( 'player' );
                 if( PreviousZone ) then
                     self.PreviousZone = PreviousZone;
@@ -135,9 +121,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             },Addon.Theme.Text.Colors.Default );
             -- Cause map zooming to control the slider
             LibStub( 'AceHook-3.0' ):SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel',function( self,Value )
-                if( InCombatLockdown() ) then
-                    return;
-                end
                 if( not Addon.APP:GetValue( 'ScrollScale' ) ) then
                     return;
                 end
@@ -172,20 +155,12 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                     Addon.APP:SetValue( SliderData.Name,NewValue );
                     Addon.APP:WorldMapFrameSetScale();
                 end
-                local WorldMapUnitPin = Addon.APP:GetWorldMapFrameUnitPin();
-                if( not WorldMapUnitPin ) then
-                    return;
-                end
-                WorldMapUnitPin:SynchronizePinSizes();
             end );
 
             --WorldMapUnitPin:SetFrameStrata( 'TOOLTIP' );
             
             -- Interface/AddOns/Blizzard_SharedMapDataProviders/GroupMembersDataProvider.lua
             LibStub( 'AceHook-3.0' ):SecureHook( WorldMapUnitPin,'SynchronizePinSizes',function( self )
-                if( InCombatLockdown() ) then
-                    return;
-                end
                 local scale = self:GetMap():GetCanvasScale();
                 for unit, size in self.dataProvider:EnumerateUnitPinSizes() do
                     if( Addon:IsClassic() and unit == 'player' ) then
@@ -205,9 +180,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.WorldMapFrameStopMoving = function( self )
-            if( InCombatLockdown() ) then
-                return;
-            end
             WorldMapFrame:StopMovingOrSizing();
             if( not( WorldMapFrame:IsMaximized() ) ) then
                 local MapPoint,MapRelativeTo,MapRelativePoint,MapXPos,MapYPos = WorldMapFrame:GetPoint();
@@ -240,9 +212,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.WorldMapFrameStartMoving = function( self )
-            if( InCombatLockdown() ) then
-                return;
-            end
             if( not WorldMapFrame:IsMaximized() ) then
                 WorldMapFrame:StartMoving();
             end
@@ -263,9 +232,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.WorldMapSetPosition = function( self )
-            if( InCombatLockdown() ) then
-                return;
-            end
             if( not( WorldMapFrame:IsMaximized() ) ) then
                 local MapPoint,MapXPos,MapYPos = self:GetValue( 'MapPoint' ),self:GetValue( 'MapXPos' ),self:GetValue( 'MapYPos' );
                 if( MapXPos ~= nil and MapYPos ~= nil ) then
@@ -303,27 +269,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.WorldMapFrameSetScale = function( self )
-            if( InCombatLockdown() ) then
-                return;
-            end
-
             WorldMapFrame:SetScale( self:GetValue( 'MapScale' ) );
-        end
-
-        --
-        -- Get Map Unit Pin
-        --
-        -- @return  mixed
-        Addon.APP.GetWorldMapFrameUnitPin = function( self )
-            local WorldMapUnitPin;
-            for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-                WorldMapUnitPin = pin
-                break;
-            end
-            if( not WorldMapUnitPin ) then
-                return;
-            end
-            return WorldMapUnitPin;
         end
 
         --
@@ -331,15 +277,11 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         -- @return  mixed
         Addon.APP.UpdateWorldMapFramePinColors = function( self )
-            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
-            if( not WorldMapUnitPin ) then
-                return;
-            end
             if( Addon.APP:GetValue( 'Debug' ) ) then
                 Addon.FRAMES:Debug( 'UpdateWorldMapFramePinColors call' );
             end
 
-            local PinColor = Addon.APP:GetValue( 'SkullMyAss' );
+            local PinColor = self:GetValue( 'SkullMyAss' );
             if( PinColor == 'Pink' ) then
                 WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\Skull_64Purple' );
             elseif( PinColor == 'Blue' ) then
@@ -360,7 +302,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
                 WorldMapUnitPin:SetPlayerPingTexture( Enum.PingTextureType.Rotation,'Interface\\minimap\\UI-Minimap-Ping-Rotate',PingWidth,PingHeight );
             end
-
             --WorldMapUnitPin:SetPinTexture( 'party','Interface\\WorldMap\\Skull_64Grey' );
             --WorldMapUnitPin:SetPinTexture( 'raid','Interface\\WorldMap\\Skull_64Red' );
             --WorldMapUnitPin:SetPinTexture( 'party','Interface\\WorldMap\\Skull_64Green' );
@@ -380,13 +321,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         -- @return  void
         Addon.APP.WorldMapFramePing = function( self )
-            if( InCombatLockdown() ) then
-                return;
-            end
-            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
-            if( not WorldMapUnitPin ) then
-                return;
-            end
             if( Addon.APP:GetValue( 'PinPing' ) ) then
                 WorldMapUnitPin:StartPlayerPing( 1,self:GetValue( 'PinAnimDuration' ) );
             else
@@ -401,9 +335,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         -- @return  void
         Addon.APP.UpdateWorldMapFrameZone = function( self )
             if( not Addon.APP:GetValue( 'UpdateWorldMapFrameZone' ) ) then
-                return;
-            end
-            if( InCombatLockdown() ) then
                 return;
             end
             -- Verify
@@ -438,9 +369,6 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
         --
         --  @return void
         Addon.APP.Refresh = function( self )
-            if( InCombatLockdown() ) then
-                return;
-            end
             if( not WorldMapFrame ) then
                 return;
             end
@@ -464,21 +392,35 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
             -- Map Zone
             self:UpdateWorldMapFrameZone();
 
-            -- Map Pin Color
-            self:UpdateWorldMapFramePinColors();
-
             -- CVars
             self:SetCVars();
 
-            -- Map Ping
-            self:WorldMapFramePing();
-
-            -- Map Pin Size
-            local WorldMapUnitPin = self:GetWorldMapFrameUnitPin();
+            -- Player Pin
             if( not WorldMapUnitPin ) then
                 return;
             end
+
+            -- Pin Size
             WorldMapUnitPin:SynchronizePinSizes();
+
+            -- Pin Color
+            self:UpdateWorldMapFramePinColors();
+
+            -- Pin Ping
+            self:WorldMapFramePing();
+
+            -- Continuous
+            if( self.Ticker ) then
+                self.Ticker:Cancel();
+            end
+            self.Ticker = C_Timer.NewTicker( Addon.APP:GetValue( 'PinPingSeconds' ),function()
+                -- Map Show
+                self:WorldMapFrameCheckShown();
+
+                -- Continue Ping
+                self:WorldMapFramePing();
+            end );
+
             Addon.FRAMES:Notify( 'Done' );
         end
 
@@ -516,41 +458,15 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
                end );
             end
 
-            -- nop passthroughNonSense
-            -- https://discord.com/channels/327414731654692866/327533449164488706/1441596995696332891
-            local pinTemplates={}
-            hooksecurefunc(WorldMapFrame,"AcquirePin",function(self,pinTemplate)
-                pinTemplates[pinTemplate]=true
-            end)
-
-            function hookPoolReset(pool, region)
-                --no map pin SetPassThroughButtons
-                if pool and pinTemplates[pool:GetTemplate()] then
-                    region.SetPassThroughButtons=nop
-                    region.SetPropagateMouseClicks=nop
-                end
-            end
-            LibStub( 'AceHook-3.0' ):SecureHook("Pool_HideAndClearAnchors",hookPoolReset);
-
             hooksecurefunc( 'MoveForwardStart',function()
                 self:UpdateWorldMapFrameZone();
             end );
-        end
 
-        --
-        --  Module run
-        --
-        --  @return void
-        Addon.APP.Run = function( self )
-            if( not WorldMapFrame ) then
-                return;
+            -- Pins
+            for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+                WorldMapUnitPin = pin
+                break;
             end
-
-            Addon.FRAMES:Notify( 'Prepping...please wait' );
-            C_Timer.After( 2, function()
-               self:Refresh();
-               self:WorldMapFramePing();
-            end );
         end
 
         Addon.DB:Init();
@@ -558,7 +474,7 @@ Addon.APP:SetScript( 'OnEvent',function( self,Event,AddonName )
 
         self:Init();
         self:CreateFrames();
-        self:Run();
+        self:Refresh();
         self:UnregisterEvent( 'ADDON_LOADED' );
     end
 end );

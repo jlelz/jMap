@@ -149,13 +149,6 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                                 Addon.APP:Refresh();
                             end
                         end
-                        if( Value ) then
-                            self.Ticker = C_Timer.NewTicker( Addon.APP:GetValue( 'PinPingSeconds' ),function()
-                                Addon.APP:WorldMapFramePing();
-                            end );
-                        else
-                            self.Ticker:Cancel();
-                        end
                     end,
                 };
                 Order = Order+1;
@@ -164,7 +157,7 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                     type = 'range',
                     name = 'Animation Duration',
                     desc = 'Pin ping animation duration',
-                    min = 10, max = 120, step = 10,
+                    min = 1, max = 10, step = 0.5,
                     arg = 'PinAnimDuration',
                 };
                 Order = Order+1;
@@ -272,6 +265,9 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
 
             SLASH_JMAP1, SLASH_JMAP2 = '/jm', '/jmap';
             SlashCmdList[ string.upper( AddonName ) ] = function( Msg,EditBox )
+                if( InCombatLockdown() ) then
+                    Addon.FRAMES:Error( 'You are in combat' );
+                end
                 if( InterfaceOptionsFrame_OpenToCategory ) then
                     InterfaceOptionsFrame_OpenToCategory( AddonName );
                     InterfaceOptionsFrame_OpenToCategory( AddonName );
@@ -279,11 +275,6 @@ Addon.CONFIG:SetScript( 'OnEvent',function( self,Event,AddonName )
                     Settings.OpenToCategory( CategoryID );
                 end
             end
-
-            self.Ticker = C_Timer.NewTicker( Addon.APP:GetValue( 'PinPingSeconds' ),function()
-                Addon.APP:WorldMapFrameCheckShown();
-                Addon.APP:WorldMapFramePing();
-            end );
         end
 
         self:UnregisterEvent( 'ADDON_LOADED' );

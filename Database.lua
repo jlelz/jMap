@@ -22,7 +22,7 @@ Addon.DB:SetScript( 'OnEvent',function( self,Event,AddonName )
 
                 MiniRotate = true,
 
-                PinAnimDuration = 90,
+                PinAnimDuration = 10,
                 PinAnimScale = 1.5,
                 PinPing = true,
                 PinPingSeconds = 10,
