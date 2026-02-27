@@ -1,3 +1,4 @@
+local _,Library = ...;
 local jMap = LibStub( 'AceAddon-3.0' ):GetAddon( 'jMap' );
 
 function jMap:GetSettings()

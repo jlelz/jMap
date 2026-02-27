@@ -1,4 +1,4 @@
-local _,Addon = ...;
+local _,Library = ...;
 local jMap = LibStub( 'AceAddon-3.0' ):NewAddon( 'jMap','AceEvent-3.0','AceHook-3.0','AceConsole-3.0' );
 
 function jMap:SetValue( Index,Value )
@@ -20,7 +20,7 @@ end
 function jMap:WorldMapFrameSynchronizeSizes( self )
     local scale = self:GetMap():GetCanvasScale();
     for unit, size in self.dataProvider:EnumerateUnitPinSizes() do
-        if( Addon:IsClassic() and unit == 'player' ) then
+        if( Library:IsClassic() and unit == 'player' ) then
             size = size+10;
             --self:SetFrameStrata( 'TOOLTIP' );
         end
@@ -53,14 +53,30 @@ function jMap:WorldMapFrameOnShow()
 
     -- Map Zone
     self:UpdateWorldMapFrameZone();
-    print( 'my ass is showing' )
+
+    -- Emotes
+    if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
+        hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
+            if( self:GetValue( 'StopReading' ) ) then
+                C_ChatInfo.CancelEmote();
+            end
+        end );
+    else
+        hooksecurefunc( 'DoEmote',function( Emote )
+            if( self:GetValue( 'StopReading' ) ) then
+                CancelEmote();
+            end
+       end );
+    end
 end
 
 function jMap:WorldMapFrameCheckShown()
-    if( self:HasMap() ) then
-        if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
-            if( not self.WorldMapFrameClosed ) then
-                WorldMapFrame:Show();
+    if( self:GetValue( 'AlwaysShow' ) ) then
+        if( self:HasMap() ) then
+            if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
+                if( not self.WorldMapFrameClosed ) then
+                    WorldMapFrame:Show();
+                end
             end
         end
     else
@@ -90,7 +106,7 @@ function jMap:WorldMapFrameOnMouseWheel( self,Value )
             },
         },
     };
-    local RangeSlider = Addon.FRAMES:AddRange( SliderData,WorldMapFrame,{
+    local RangeSlider = Library.FRAMES:AddRange( SliderData,WorldMapFrame,{
         -- AddRange initialization calls this
         Get = function( Index )
             return jMap:GetValue( 'MapScale' );
@@ -100,7 +116,7 @@ function jMap:WorldMapFrameOnMouseWheel( self,Value )
             print( 'Set',Index,Value)
             --return jMap:SetValue( 'MapScale',Value );
         end,
-    },Addon.Theme.Text.Colors.Default );
+    },Library.Theme.Text.Colors.Default );
 
     local CurrentValue = jMap:GetValue( SliderData.Name );
     local ScrollDirection;
@@ -147,7 +163,7 @@ function jMap:WorldMapFrameStopMoving()
             jMap:SetValue( 'MapYPos',MapYPos );
 
             if( jMap:GetValue( 'Debug' ) ) then
-                Addon:Dump( {
+                Library:Dump( {
                     Action = 'Saving',
                     MapPoint = jMap:GetValue( 'MapPoint' ),
                     MapRelativeTo = jMap:GetValue( 'MapRelativeTo' ), 
@@ -156,7 +172,7 @@ function jMap:WorldMapFrameStopMoving()
                     MapYPos = jMap:GetValue( 'MapYPos' ), 
                 } );
 
-                Addon.FRAMES:Debug( 'WorldMapFrameStopMoving' );
+                Library.FRAMES:Debug( 'WorldMapFrameStopMoving' );
             end
         end
     end
@@ -175,7 +191,7 @@ function jMap:WorldMapSetPosition()
         if( MapXPos ~= nil and MapYPos ~= nil ) then
 
             if( self:GetValue( 'Debug' ) ) then
-                Addon:Dump( {
+                Library:Dump( {
                     Action = 'Loading',
                     MapPoint = MapPoint,
                     MapRelativeTo = MapRelativeTo, 
@@ -184,27 +200,26 @@ function jMap:WorldMapSetPosition()
                     MapYPos = MapYPos, 
                 } );
 
-                Addon.FRAMES:Debug( 'WorldMapSetPosition' );
+                Library.FRAMES:Debug( 'WorldMapSetPosition' );
             end
             
             WorldMapFrame:ClearAllPoints();
             WorldMapFrame:SetPoint( MapPoint,MapXPos,MapYPos );
-            print( 'setting WorldMapFrame position')
         end
     end
 end
 
 function jMap:SetCVars()
-    SetCVar('questLogOpen',Addon:BoolToInt( not self:GetValue( 'PanelColapsed' ) ) );
+    SetCVar('questLogOpen',Library:BoolToInt( not self:GetValue( 'PanelColapsed' ) ) );
 
-    SetCVar( 'mapFade',Addon:BoolToInt( self:GetValue( 'MapFade' ) ) );
+    SetCVar( 'mapFade',Library:BoolToInt( self:GetValue( 'MapFade' ) ) );
 
-    SetCVar( 'rotateMinimap',Addon:BoolToInt( self:GetValue( 'MiniRotate' ) ) );
+    SetCVar( 'rotateMinimap',Library:BoolToInt( self:GetValue( 'MiniRotate' ) ) );
 end
 
 function jMap:WorldMapFrameUpdatePinColor()
     if( self:GetValue( 'Debug' ) ) then
-        Addon.FRAMES:Debug( 'WorldMapFrameUpdatePinColor' );
+        Library.FRAMES:Debug( 'WorldMapFrameUpdatePinColor' );
     end
 
     -- Player Pin
@@ -266,7 +281,7 @@ function jMap:WorldMapFramePing()
 end
 
 function jMap:HasMap()
-    if( Addon:IsVanilla() ) then
+    if( Library:IsVanilla() ) then
         local Instanced,InstanceType = IsInInstance();
         if( Instanced ) then
             return false;
@@ -311,7 +326,7 @@ function jMap:Refresh()
         return;
     end
     
-    Addon.FRAMES:Notify( 'Refreshing all settings...' );
+    Library.FRAMES:Notify( 'Refreshing all settings...' );
 
     -- Map Strata
     local DefaultStrata = WorldMapFrame:GetFrameStrata();
@@ -321,45 +336,19 @@ function jMap:Refresh()
         WorldMapFrame:SetFrameStrata( DefaultStrata );
     end
 
-    -- Map Show
-    self:WorldMapFrameCheckShown();
-
-    -- Map Position
-    self:WorldMapSetPosition();
-
-    -- Map Scale
-    self:WorldMapFrameSetScale();
-
-    -- Map Zone
-    self:UpdateWorldMapFrameZone();
-
-    -- CVars
-    self:SetCVars();
-
-    -- Player Pin
-    local WorldMapUnitPin;
-    for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = pin
-        break;
-    end
-
-    -- Pin Color
+    -- Map Pin
     self:WorldMapFrameUpdatePinColor();
+    
+    -- Map Show
+    self:WorldMapFrameOnShow();
 
-    -- Pin Ping
-    self:WorldMapFramePing();
+    -- Check Show
+    self:WorldMapFrameCheckShown();
 
     -- Continuous
     if( self.Ticker ) then
         self.Ticker:Cancel();
     end
-
-    -- Run Show
-    self:WorldMapFrameOnShow();
-
-    -- Map Zone
-    self:UpdateWorldMapFrameZone();
-
     self.Ticker = C_Timer.NewTicker( self:GetValue( 'PinPingSeconds' ),function()
         -- Map Show
         self:WorldMapFrameCheckShown();
@@ -368,28 +357,10 @@ function jMap:Refresh()
         self:WorldMapFramePing();
     end );
 
-    self:SecureCenterPlayerPin();
+    -- Map Ping
+    self:WorldMapFramePing();
 
-    Addon.FRAMES:Notify( 'Done' );
-end
-
-function jMap:SecureCenterPlayerPin()
-
-        if not WorldMapFrame.dataProviders then return end
-        
-        for provider, _ in pairs(WorldMapFrame.dataProviders) do
-            -- Look for the DataProvider handling the player unit
-            if provider.ShouldShowUnit and provider:ShouldShowUnit("player") and provider.pin then
-                -- Hook into the update function of the pin
-                self:SecureHook(provider.pin, "UpdatePosition", function(pin)
-                    -- Set the position to 0.5, 0.5 (center)
-                    pin:SetPosition(0.5, 0.5)
-                end)
-                -- Force initial update
-                provider.pin:UpdatePosition()
-                break
-            end
-        end
+    Library.FRAMES:Notify( 'Done' );
 end
 
 function jMap:OnEnable()
@@ -419,36 +390,10 @@ function jMap:OnEnable()
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
-    self:SecureHook( WorldMapUnitPin,'OnAcquired',function()
-        print( 'here' )
-    end );
-    self:SecureHook(WorldMapFrame, "OnMapChanged", 'SecureCenterPlayerPin')
 
     -- Position
     WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
     WorldMapFrame:HookScript( 'OnDragStop',self.WorldMapFrameStopMoving );
-
-    -- Emotes
-    if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
-        hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
-            print( 'second line')
-            if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
-                print( 'third line')
-                if( self:GetValue( 'StopReading' ) ) then
-                    print( 'fourth line')
-                    C_ChatInfo.CancelEmote();
-                end
-            end
-        end );
-    else
-        hooksecurefunc( 'DoEmote',function( Emote )
-            if( Emote == 'READ' and WorldMapFrame:IsShown() ) then
-                if( self:GetValue( 'StopReading' ) ) then
-                    CancelEmote();
-                end
-            end
-       end );
-    end
 end
 
 function jMap:ConfigOpen( Input )

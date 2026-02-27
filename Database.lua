@@ -1,3 +1,4 @@
+local _,Library = ...;
 local jMap = LibStub( 'AceAddon-3.0' ):GetAddon( 'jMap' );
 
 function jMap:SetDBValue( Index,Value )
@@ -12,65 +13,58 @@ function jMap:GetDBValue( Index )
     end
 end
 
-function jMap:Reset()
-    if( not self.db ) then
-        return;
-    end
-    self.db:ResetDB();
-end
-
 function jMap:GetPersistence()
-    if( not self.db ) then
-        return;
-    end
-    local Player = UnitName( 'player' );
-    local Realm = GetRealmName();
-    local PlayerRealm = Player..'-'..Realm;
-
-    self.persistence = self.db.global;
-    if( not self.persistence ) then
-        return;
-    end
-    return self.persistence;
+    return self.db.global;
 end
 
-function jMap:RefreshDB( Event,Database,NewProfileKey )
-    Addon.FRAMES:Notify( 'Profile changed to: ',NewProfileKey );
-    jMap:Refresh();
+function jMap:Reset()
+    -- Wipe Database
+    wipe( self.db.global ); 
+
+    -- Reset Profile
+    self.db:ResetProfile();
+
+    -- Refresh Settings
+    if( C_UI and C_UI.Reload ) then
+        C_UI.Reload();
+    else
+        ReloadUI();
+    end
 end
 
 function jMap:InitializeDB()
-    self.Defaults = {
-        MapPoint = 'TOPLEFT',
-        MapRelativeTo = 'UIParent',
-        MapRelativePoint = nil,
-        MapXPos = 15.480,
-        MapYPos = -48.181,
-        MapScale = 0.866,
-        MapAlpha = 0.2,
-        MapFade = false,
+    local Defaults = {
+        global = {
+            MapPoint = 'TOPLEFT',
+            MapRelativeTo = 'UIParent',
+            MapRelativePoint = nil,
+            MapXPos = 4.584,
+            MapYPos = -6.965,
+            MapScale = 0.866,
+            MapAlpha = 0.2,
+            MapFade = false,
 
-        MiniRotate = true,
+            MiniRotate = true,
 
-        PinAnimDuration = 10,
-        PinAnimScale = 1.5,
-        PinPing = true,
-        PinPingSeconds = 10,
-        SkullMyAss = 'Pink',
-        MatchWorldScale = true,
-        ClassColors = false,
-        AlwaysShow = true,
-        PanelColapsed = true,
-        StopReading = true,
-        SitBehind = false,
-        UpdateWorldMapFrameZone = true,
-        ScrollScale = true,
-        Debug = false,
+            PinAnimDuration = 10,
+            PinAnimScale = 1.5,
+            PinPing = true,
+            PinPingSeconds = 10,
+            SkullMyAss = 'Pink',
+            ClassColors = false,
+            AlwaysShow = true,
+            PanelColapsed = true,
+            StopReading = true,
+            SitBehind = false,
+            UpdateWorldMapFrameZone = true,
+            ScrollScale = true,
+            Debug = false,
+        },
     };
 
-    self.db = LibStub( 'AceDB-3.0' ):New( self:GetName(),{ global = self.Defaults },true );
+    self.db = LibStub( 'AceDB-3.0' ):New( self:GetName(),Defaults,'global' );
 
-    self.db.RegisterCallback( self,'OnProfileChanged',jMap.RefreshDB );
-    self.db.RegisterCallback( self,'OnProfileCopied',jMap.RefreshDB );
-    self.db.RegisterCallback( self,'OnProfileReset',jMap.RefreshDB );
+    self.db.RegisterCallback( self,'OnProfileChanged','Reset' );
+    self.db.RegisterCallback( self,'OnProfileCopied','Reset' );
+    self.db.RegisterCallback( self,'OnProfileReset','Reset' );
 end
