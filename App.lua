@@ -9,6 +9,14 @@ function jMap:GetValue( Index )
     return self:GetDBValue( Index );
 end
 
+function jMap:WorldMapFrameSynchronizeDisplayState()
+    -- Map Position
+    self:WorldMapSetPosition();
+
+    -- Map Scale
+    self:WorldMapFrameSetScale();
+end
+
 function jMap:WorldMapFrameSynchronizeSizes( self )
     local scale = self:GetMap():GetCanvasScale();
     for unit, size in self.dataProvider:EnumerateUnitPinSizes() do
@@ -45,13 +53,13 @@ function jMap:WorldMapFrameOnShow()
 
     -- Map Zone
     self:UpdateWorldMapFrameZone();
+    print( 'my ass is showing' )
 end
 
 function jMap:WorldMapFrameCheckShown()
     if( self:HasMap() ) then
         if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
             if( not self.WorldMapFrameClosed ) then
-                print( 'opening map' )
                 WorldMapFrame:Show();
             end
         end
@@ -293,6 +301,7 @@ function jMap:OnCombatChanged( Event )
         WorldMapFrame:Hide();
         self.WorldMapFrameClosed = true;
     else
+        WorldMapFrame:Show();
         self.WorldMapFrameClosed = false;
     end
 end
@@ -314,7 +323,15 @@ function jMap:Refresh()
 
     -- Map Show
     self:WorldMapFrameCheckShown();
-    self:WorldMapFrameOnShow();
+
+    -- Map Position
+    self:WorldMapSetPosition();
+
+    -- Map Scale
+    self:WorldMapFrameSetScale();
+
+    -- Map Zone
+    self:UpdateWorldMapFrameZone();
 
     -- CVars
     self:SetCVars();
@@ -336,16 +353,43 @@ function jMap:Refresh()
     if( self.Ticker ) then
         self.Ticker:Cancel();
     end
+
+    -- Run Show
+    self:WorldMapFrameOnShow();
+
+    -- Map Zone
+    self:UpdateWorldMapFrameZone();
+
     self.Ticker = C_Timer.NewTicker( self:GetValue( 'PinPingSeconds' ),function()
         -- Map Show
         self:WorldMapFrameCheckShown();
-        self:WorldMapFrameOnShow();
 
         -- Continue Ping
         self:WorldMapFramePing();
     end );
 
+    self:SecureCenterPlayerPin();
+
     Addon.FRAMES:Notify( 'Done' );
+end
+
+function jMap:SecureCenterPlayerPin()
+
+        if not WorldMapFrame.dataProviders then return end
+        
+        for provider, _ in pairs(WorldMapFrame.dataProviders) do
+            -- Look for the DataProvider handling the player unit
+            if provider.ShouldShowUnit and provider:ShouldShowUnit("player") and provider.pin then
+                -- Hook into the update function of the pin
+                self:SecureHook(provider.pin, "UpdatePosition", function(pin)
+                    -- Set the position to 0.5, 0.5 (center)
+                    pin:SetPosition(0.5, 0.5)
+                end)
+                -- Force initial update
+                provider.pin:UpdatePosition()
+                break
+            end
+        end
 end
 
 function jMap:OnEnable()
@@ -371,24 +415,18 @@ function jMap:OnEnable()
     end
 
     -- Hooks
+    self:SecureHook( WorldMapFrame,'SynchronizeDisplayState','WorldMapFrameSynchronizeDisplayState' );
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
     self:SecureHook( WorldMapUnitPin,'OnAcquired',function()
         print( 'here' )
     end );
-
-    hooksecurefunc( 'MoveForwardStart',function()
-        self:UpdateWorldMapFrameZone();
-    end );
+    self:SecureHook(WorldMapFrame, "OnMapChanged", 'SecureCenterPlayerPin')
 
     -- Position
     WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
     WorldMapFrame:HookScript( 'OnDragStop',self.WorldMapFrameStopMoving );
-
-    -- Map Show
-    self:WorldMapFrameCheckShown();
-    self:WorldMapFrameOnShow();
 
     -- Emotes
     if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
