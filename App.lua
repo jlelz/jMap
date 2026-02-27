@@ -161,19 +161,6 @@ function jMap:WorldMapFrameStopMoving()
             jMap:SetValue( 'MapRelativePoint',MapRelativePoint );
             jMap:SetValue( 'MapXPos',MapXPos );
             jMap:SetValue( 'MapYPos',MapYPos );
-
-            if( jMap:GetValue( 'Debug' ) ) then
-                Library:Dump( {
-                    Action = 'Saving',
-                    MapPoint = jMap:GetValue( 'MapPoint' ),
-                    MapRelativeTo = jMap:GetValue( 'MapRelativeTo' ), 
-                    MapRelativePoint = jMap:GetValue( 'MapRelativePoint' ), 
-                    MapXPos = jMap:GetValue( 'MapXPos' ), 
-                    MapYPos = jMap:GetValue( 'MapYPos' ), 
-                } );
-
-                Library.FRAMES:Debug( 'WorldMapFrameStopMoving' );
-            end
         end
     end
     WorldMapFrame:SetUserPlaced( true );
@@ -189,20 +176,6 @@ function jMap:WorldMapSetPosition()
     if( not( WorldMapFrame:IsMaximized() ) ) then
         local MapPoint,MapXPos,MapYPos = self:GetValue( 'MapPoint' ),self:GetValue( 'MapXPos' ),self:GetValue( 'MapYPos' );
         if( MapXPos ~= nil and MapYPos ~= nil ) then
-
-            if( self:GetValue( 'Debug' ) ) then
-                Library:Dump( {
-                    Action = 'Loading',
-                    MapPoint = MapPoint,
-                    MapRelativeTo = MapRelativeTo, 
-                    MapRelativePoint = MapRelativePoint, 
-                    MapXPos = MapXPos, 
-                    MapYPos = MapYPos, 
-                } );
-
-                Library.FRAMES:Debug( 'WorldMapSetPosition' );
-            end
-            
             WorldMapFrame:ClearAllPoints();
             WorldMapFrame:SetPoint( MapPoint,MapXPos,MapYPos );
         end
@@ -218,10 +191,6 @@ function jMap:SetCVars()
 end
 
 function jMap:WorldMapFrameUpdatePinColor()
-    if( self:GetValue( 'Debug' ) ) then
-        Library.FRAMES:Debug( 'WorldMapFrameUpdatePinColor' );
-    end
-
     -- Player Pin
     local WorldMapUnitPin;
     for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
@@ -311,22 +280,14 @@ function jMap:OnZoneChanged()
     self:UpdateWorldMapFrameZone();
 end
 
-function jMap:OnCombatChanged( Event )
-    if( Event  == 'PLAYER_REGEN_DISABLED' ) then
-        WorldMapFrame:Hide();
-        self.WorldMapFrameClosed = true;
-    else
-        WorldMapFrame:Show();
-        self.WorldMapFrameClosed = false;
-    end
-end
-
 function jMap:Refresh()
     if( not WorldMapFrame ) then
         return;
     end
     
-    Library.FRAMES:Notify( 'Refreshing all settings...' );
+    if( self:GetValue( 'Debug' ) ) then
+        Library.FRAMES:Debug( 'Refreshing all settings...' );
+    end
 
     -- Map Strata
     local DefaultStrata = WorldMapFrame:GetFrameStrata();
@@ -360,7 +321,9 @@ function jMap:Refresh()
     -- Map Ping
     self:WorldMapFramePing();
 
-    Library.FRAMES:Notify( 'Done' );
+    if( self:GetValue( 'Debug' ) ) then
+        Library.FRAMES:Debug( 'Done' );
+    end
 end
 
 function jMap:OnEnable()
@@ -375,9 +338,6 @@ function jMap:OnEnable()
     self:RegisterEvent( 'ZONE_CHANGED_INDOORS','OnZoneChanged' );
     self:RegisterEvent( 'ZONE_CHANGED','OnZoneChanged' );
 
-    self:RegisterEvent( 'PLAYER_REGEN_DISABLED','OnCombatChanged' );
-    self:RegisterEvent( 'PLAYER_REGEN_ENABLED','OnCombatChanged' );
-
     -- Player Pin
     local WorldMapUnitPin;
     for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
@@ -390,6 +350,21 @@ function jMap:OnEnable()
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
+
+    hooksecurefunc( MapCanvasPinMixin,'CheckMouseButtonPassthrough',function( ... )
+        -- Pins get reused, so this needs to be updated each time a pin is acquired.
+        self:SetPassThroughButtons(); -- Clear existing passthrough buttons
+
+        local passthroughButtons = {};
+        for i = 1, select("#", ...) do
+            local button = select(i, ...);
+            if self:ShouldMouseButtonBePassthrough(button) then
+                table.insert(passthroughButtons, button);
+            end
+        end
+
+        self:SetPassThroughButtons(unpack(passthroughButtons));
+    end );
 
     -- Position
     WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
