@@ -184,13 +184,13 @@ function jMap:GetSettings()
     local Settings = {
         type = 'group',
         get = function( Info )
-            if( Database:GetPersistence()[ Info.arg ] ~= nil ) then
-                return Database:GetPersistence()[ Info.arg ];
+            if( self:GetPersistence()[ Info.arg ] ~= nil ) then
+                return self:GetPersistence()[ Info.arg ];
             end
         end,
         set = function( Info,Value )
-            if( Database:GetPersistence()[ Info.arg ] ~= nil ) then
-                Database:GetPersistence()[ Info.arg ] = Value;
+            if( self:GetPersistence()[ Info.arg ] ~= nil ) then
+                self:GetPersistence()[ Info.arg ] = Value;
                 if( jMap.Refresh ) then
                     jMap:Refresh();
                 end
