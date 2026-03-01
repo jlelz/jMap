@@ -210,22 +210,16 @@ function jMap:WorldMapFrameUpdatePinColor()
         break;
     end
 
-    local PinColor = self:GetValue( 'SkullMyAss' );
-    if( PinColor == 'Pink' ) then
-        WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\Skull_64Purple' );
-    elseif( PinColor == 'Blue' ) then
-        WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\Skull_64Blue' );
-    elseif( PinColor == 'Yellow' ) then
-        WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\skull_64' );
-    elseif( PinColor == 'Green' ) then
-        WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\Skull_64Green' );
-    elseif( PinColor == 'Grey' ) then
-        WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\skull_64grey' );
-    elseif( PinColor == 'Red' ) then
-        WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\Skull_64Red' );
-    elseif( PinColor == 'Normal' ) then
-        WorldMapUnitPin:SetPinTexture( 'player','Interface\\WorldMap\\WorldMapArrow' );
-    end
+    local SkullPins = {
+        Pink = 'Interface\\WorldMap\\Skull_64Purple',
+        Blue = 'Interface\\WorldMap\\Skull_64Blue',
+        Yellow = 'Interface\\WorldMap\\skull_64',
+        Green = 'Interface\\WorldMap\\Skull_64Green',
+        Grey = 'Interface\\WorldMap\\skull_64grey',
+        Red = 'Interface\\WorldMap\\Skull_64Red',
+        Normal = 'Interface\\WorldMap\\WorldMapArrow',
+    }
+    WorldMapUnitPin:SetPinTexture( 'player',SkullPins[ self:GetValue( 'SkullMyAss' ) ] );
     local PingWidth,PingHeight = 75,75;
 
     if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
