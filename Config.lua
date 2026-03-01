@@ -72,6 +72,16 @@ function jMap:GetSettings()
             desc = 'If your character should /read while the map is open',
             arg = 'StopReading',
         };
+        if( Library:IsRetail() ) then
+            Order = Order+1;
+            Settings.PanelColapsed = {
+                order = Order,
+                type = 'toggle',
+                name = 'Quest Panel Closed',
+                desc = 'Whether or not the map should expand the quest list',
+                arg = 'PanelColapsed',
+            };
+        end
         Order = Order+1;
         Settings.MapScale = {
             order = Order,
@@ -99,24 +109,6 @@ function jMap:GetSettings()
         };
 
         return Settings;
-    end
-    local GetQuests = function()
-        local Order = 1;
-        local Settings = {
-            General = {
-                type = 'header',
-                order = Order,
-                name = 'Quests',
-            },
-        };
-        Order = Order+1;
-        Settings.PanelColapsed = {
-            order = Order,
-            type = 'toggle',
-            name = 'Quest Panel Closed',
-            desc = 'Whether or not the retail version of the map should expand the quest list',
-            arg = 'PanelColapsed',
-        };
     end
     local GetPins = function()
         local Order = 1;
