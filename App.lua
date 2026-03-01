@@ -71,6 +71,9 @@ function jMap:WorldMapFrameOnShow()
 end
 
 function jMap:WorldMapFrameCheckShown()
+    if( self:GetValue( 'Debug' ) ) then
+        Library.FRAMES:Debug( 'WorldMapFrameCheckShown' );
+    end
     if( self:GetValue( 'AlwaysShow' ) ) then
         if( self:HasMap() ) then
             if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
@@ -78,6 +81,8 @@ function jMap:WorldMapFrameCheckShown()
                     WorldMapFrame:Show();
                 end
             end
+        else
+            WorldMapFrame:Hide();
         end
     else
         WorldMapFrame:Hide();
@@ -278,6 +283,9 @@ end
 
 function jMap:OnZoneChanged()
     self:UpdateWorldMapFrameZone();
+
+    -- Check Show
+    self:WorldMapFrameCheckShown();
 end
 
 function jMap:Refresh()
