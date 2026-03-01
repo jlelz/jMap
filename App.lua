@@ -11,7 +11,7 @@ end
 
 function jMap:WorldMapFrameSynchronizeDisplayState()
     -- Map Position
-    self:WorldMapSetPosition();
+    self:WorldMapFrameSetPosition();
 
     -- Map Scale
     self:WorldMapFrameSetScale();
@@ -33,7 +33,7 @@ end
 
 function jMap:WorldMapFrameOnShow()
     -- Map Position
-    self:WorldMapSetPosition();
+    self:WorldMapFrameSetPosition();
 
     -- Map Scale
     self:WorldMapFrameSetScale();
@@ -184,7 +184,7 @@ function jMap:WorldMapFrameStartMoving()
     end
 end
 
-function jMap:WorldMapSetPosition()
+function jMap:WorldMapFrameSetPosition()
     if( not( WorldMapFrame:IsMaximized() ) ) then
         local MapPoint,MapXPos,MapYPos = self:GetValue( 'MapPoint' ),self:GetValue( 'MapXPos' ),self:GetValue( 'MapYPos' );
         if( MapXPos ~= nil and MapYPos ~= nil ) then
@@ -359,7 +359,6 @@ function jMap:OnEnable()
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
-
     hooksecurefunc( MapCanvasPinMixin,'CheckMouseButtonPassthrough',function( ... )
         self:SetPassThroughButtons(); -- Clear existing passthrough buttons
     end );
