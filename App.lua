@@ -32,7 +32,6 @@ function jMap:WorldMapFrameSynchronizeSizes( self )
 end
 
 function jMap:WorldMapFrameOnShow()
-
     -- Map Position
     self:WorldMapSetPosition();
 
@@ -56,6 +55,26 @@ function jMap:WorldMapFrameOnShow()
             end
        end );
     end
+
+    -- Fading
+    local function OnUpdate()
+        local Setting = {
+            MinAlpha = jMap:GetValue( 'MapAlpha' ),
+            MaxAlpha = 1.0,
+            TimeToMax = 0.1,
+        };
+        if( WorldMapFrame:IsMouseOver() ) then
+            WorldMapFrame:SetAlpha( Setting.MaxAlpha );
+        else
+            WorldMapFrame:SetAlpha( Setting.MinAlpha );
+        end
+    end
+    FrameFaderDriver = CreateFrame( 'FRAME',nil,WorldMapFrame );
+    FrameFaderDriver:HookScript( 'OnUpdate',OnUpdate );
+    PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
+
+    -- Map Ping
+    self:WorldMapFramePing();
 end
 
 function jMap:WorldMapFrameCheckShown()
@@ -354,20 +373,6 @@ function jMap:OnEnable()
     -- Position
     WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
     WorldMapFrame:HookScript( 'OnDragStop',self.WorldMapFrameStopMoving );
-
-    -- Fading
-    local function OnUpdate( self,Elapsed )
-        local FadeOut = not WorldMapFrame:IsMouseOver();
-        local Setting = {
-            MinAlpha = jMap:GetValue( 'MapAlpha' ),
-            MaxAlpha = 1.0,
-            TimeToMax = 0.1,
-        };
-        WorldMapFrame:SetAlpha( DeltaLerp( WorldMapFrame:GetAlpha(),FadeOut and Setting.MinAlpha or Setting.MaxAlpha,Setting.TimeToMax,Elapsed ) );
-    end
-    FrameFaderDriver = CreateFrame( 'FRAME',nil,Map );
-    FrameFaderDriver:HookScript( 'OnUpdate',OnUpdate );
-    PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
 end
 
 function jMap:ConfigOpen( Input )
