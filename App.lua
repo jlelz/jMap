@@ -32,18 +32,6 @@ function jMap:WorldMapFrameSynchronizeSizes( self )
 end
 
 function jMap:WorldMapFrameOnShow()
-    local function OnUpdate( self,Elapsed )
-        local FadeOut = not WorldMapFrame:IsMouseOver();
-        local Setting = {
-            MinAlpha = jMap:GetValue( 'MapAlpha' ),
-            MaxAlpha = 1.0,
-            TimeToMax = 0.1,
-        };
-        WorldMapFrame:SetAlpha( DeltaLerp( WorldMapFrame:GetAlpha(),FadeOut and Setting.MinAlpha or Setting.MaxAlpha,Setting.TimeToMax,Elapsed ) );
-    end
-    FrameFaderDriver = CreateFrame( 'FRAME',nil,Map );
-    FrameFaderDriver:HookScript( 'OnUpdate',OnUpdate );
-    PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
 
     -- Map Position
     self:WorldMapSetPosition();
@@ -360,23 +348,26 @@ function jMap:OnEnable()
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
 
     hooksecurefunc( MapCanvasPinMixin,'CheckMouseButtonPassthrough',function( ... )
-        -- Pins get reused, so this needs to be updated each time a pin is acquired.
         self:SetPassThroughButtons(); -- Clear existing passthrough buttons
-
-        local passthroughButtons = {};
-        for i = 1, select("#", ...) do
-            local button = select(i, ...);
-            if self:ShouldMouseButtonBePassthrough(button) then
-                table.insert(passthroughButtons, button);
-            end
-        end
-
-        self:SetPassThroughButtons(unpack(passthroughButtons));
     end );
 
     -- Position
     WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
     WorldMapFrame:HookScript( 'OnDragStop',self.WorldMapFrameStopMoving );
+
+    -- Fading
+    local function OnUpdate( self,Elapsed )
+        local FadeOut = not WorldMapFrame:IsMouseOver();
+        local Setting = {
+            MinAlpha = jMap:GetValue( 'MapAlpha' ),
+            MaxAlpha = 1.0,
+            TimeToMax = 0.1,
+        };
+        WorldMapFrame:SetAlpha( DeltaLerp( WorldMapFrame:GetAlpha(),FadeOut and Setting.MinAlpha or Setting.MaxAlpha,Setting.TimeToMax,Elapsed ) );
+    end
+    FrameFaderDriver = CreateFrame( 'FRAME',nil,Map );
+    FrameFaderDriver:HookScript( 'OnUpdate',OnUpdate );
+    PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
 end
 
 function jMap:ConfigOpen( Input )
