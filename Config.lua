@@ -137,7 +137,7 @@ function jMap:GetSettings()
             arg = 'PinAnimDuration',
         };
         Order = Order+1;
-        Settings.SkullMyAss = {
+        Settings.PinColor = {
             order = Order,
             type = 'select',
             name = 'Pin',
@@ -151,7 +151,7 @@ function jMap:GetSettings()
                 Red = 'Red',
                 Normal = 'Normal', 
             },
-            arg = 'SkullMyAss',
+            arg = 'PinColor',
         };
         Order = Order+1;
         Settings.ClassColors = {

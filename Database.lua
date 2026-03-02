@@ -50,7 +50,7 @@ function jMap:InitializeDB()
             PinAnimScale = 1.5,
             PinPing = true,
             PinPingSeconds = 10,
-            SkullMyAss = 'Pink',
+            PinColor = 'Pink',
             ClassColors = false,
             AlwaysShow = true,
             PanelColapsed = true,

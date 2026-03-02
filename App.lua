@@ -219,7 +219,7 @@ function jMap:WorldMapFrameUpdatePinColor()
         Red = 'Interface\\WorldMap\\Skull_64Red',
         Normal = 'Interface\\WorldMap\\WorldMapArrow',
     }
-    WorldMapUnitPin:SetPinTexture( 'player',SkullPins[ self:GetValue( 'SkullMyAss' ) ] );
+    WorldMapUnitPin:SetPinTexture( 'player',SkullPins[ self:GetValue( 'PinColor' ) ] );
     local PingWidth,PingHeight = 75,75;
 
     if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
