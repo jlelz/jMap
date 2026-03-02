@@ -306,6 +306,9 @@ function jMap:Refresh()
         WorldMapFrame:SetFrameStrata( DefaultStrata );
     end
 
+    -- Map Settings
+    self:SetCVars();
+
     -- Map Pin
     self:WorldMapFrameUpdatePinColor();
     
