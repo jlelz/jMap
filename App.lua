@@ -32,16 +32,10 @@ function jMap:WorldMapFrameSynchronizeSizes( self )
 end
 
 function jMap:WorldMapFrameOnShow()
-    -- Map Position
-    self:WorldMapFrameSetPosition();
+    -- Map Sync
+    self:WorldMapFrameSynchronizeDisplayState();
 
-    -- Map Scale
-    self:WorldMapFrameSetScale();
-
-    -- Map Zone
-    self:UpdateWorldMapFrameZone();
-
-    -- Emotes
+    -- Map Emote
     if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
         hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
             if( self:GetValue( 'StopReading' ) ) then
@@ -56,7 +50,7 @@ function jMap:WorldMapFrameOnShow()
        end );
     end
 
-    -- Fading
+    -- Map Fade
     local function OnUpdate()
         local Setting = {
             MinAlpha = jMap:GetValue( 'MapAlpha' ),
@@ -272,21 +266,16 @@ function jMap:UpdateWorldMapFrameZone()
     if( not self:GetValue( 'UpdateWorldMapFrameZone' ) ) then
         return;
     end
-
     local NewPosition = WorldMapFrame.mapID;
     local CurrentZone = C_Map.GetBestMapForUnit( 'player' );
 
     if( CurrentZone ) then
         WorldMapFrame:SetMapID( CurrentZone );
     end
-    --WorldMapFrame:ResetZoom();
 end
 
 function jMap:OnZoneChanged()
     self:UpdateWorldMapFrameZone();
-
-    -- Check Show
-    self:WorldMapFrameCheckShown();
 end
 
 function jMap:Refresh()
@@ -312,6 +301,9 @@ function jMap:Refresh()
     -- Map Pin
     self:WorldMapFrameUpdatePinColor();
     
+    -- Map Sync
+    self:WorldMapFrameSynchronizeDisplayState();
+
     -- Map Show
     self:WorldMapFrameOnShow();
 
@@ -362,13 +354,16 @@ function jMap:OnEnable()
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
-    hooksecurefunc( MapCanvasPinMixin,'CheckMouseButtonPassthrough',function( ... )
-        self:SetPassThroughButtons(); -- Clear existing passthrough buttons
+    hooksecurefunc( 'MoveForwardStart',function()
+        self:UpdateWorldMapFrameZone();
     end );
 
     -- Position
     WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
     WorldMapFrame:HookScript( 'OnDragStop',self.WorldMapFrameStopMoving );
+
+    -- Refresh
+    self:Refresh();
 end
 
 function jMap:ConfigOpen( Input )
@@ -387,6 +382,5 @@ end
 function jMap:OnInitialize()
     self:InitializeDB();
     self:InitializeConfig();
-    self:Refresh();
     self:RegisterChatCommand( 'jm','ConfigOpen' );
 end
