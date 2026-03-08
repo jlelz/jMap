@@ -17,18 +17,108 @@ function jMap:WorldMapFrameSynchronizeDisplayState()
     self:WorldMapFrameSetScale();
 end
 
-function jMap:WorldMapFrameSynchronizeSizes( self )
-    local scale = self:GetMap():GetCanvasScale();
-    for unit, size in self.dataProvider:EnumerateUnitPinSizes() do
-        if( Library:IsClassic() and unit == 'player' ) then
-            size = size+10;
-            --self:SetFrameStrata( 'TOOLTIP' );
-        end
-        if self.dataProvider:ShouldShowUnit(unit) then
-            self:SetPinSize(unit, size / scale);
+function jMap:WorldMapFrameSynchronizeSizes()
+    local WorldMapUnitPin;
+    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+        WorldMapUnitPin = Pin;
+        break;
+    end 
+    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+        return;
+    end
+    if( jMap:GetValue( 'Debug' ) ) then
+        Library.FRAMES:Debug( 'WorldMapFrameSynchronizeSizes' );
+    end
+    local PlayerWidth,PlayerHeight = 64,64;
+    local PingWidth,PingHeight = 75,75;
+    if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
+        WorldMapUnitPin:SetPlayerPingTexture( Enum.PingTextureType.Rotation,'Interface\\minimap\\UI-Minimap-Ping-Rotate',PingWidth,PingHeight );
+    end
+    if( WorldMapUnitPin and WorldMapUnitPin.SetPlayerPingScale ) then
+        WorldMapUnitPin:SetPlayerPingScale( jMap:GetValue( 'PinAnimScale' )/WorldMapFrame:GetCanvasScale() );
+    end
+    if( WorldMapUnitPin and WorldMapUnitPin.SetPinSize ) then
+        WorldMapUnitPin:SetPinSize( PlayerWidth,PlayerHeight );
+    end
+end
+
+function jMap:WorldMapFrameUpdatePin()
+    local WorldMapUnitPin;
+    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+        WorldMapUnitPin = Pin;
+        break;
+    end 
+    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+        return;
+    end
+    if( self:GetValue( 'Debug' ) ) then
+        Library.FRAMES:Debug( 'WorldMapFrameUpdatePin' );
+    end
+    if( WorldMapUnitPin.SetPinTexture ) then
+        local SkullPins = {
+            Pink = 'Interface\\WorldMap\\Skull_64Purple',
+            Blue = 'Interface\\WorldMap\\Skull_64Blue',
+            Yellow = 'Interface\\WorldMap\\skull_64',
+            Green = 'Interface\\WorldMap\\Skull_64Green',
+            Grey = 'Interface\\WorldMap\\skull_64grey',
+            Red = 'Interface\\WorldMap\\Skull_64Red',
+            Normal = 'Interface\\WorldMap\\WorldMapArrow',
+        }
+        WorldMapUnitPin:SetPinTexture( 'player',SkullPins[ jMap:GetValue( 'PinColor' ) ] );
+        WorldMapUnitPin:SetFrameLevel( 5000 );
+    end
+end
+
+function jMap:UpdatePartyPins()
+    local WorldMapUnitPin;
+    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+        WorldMapUnitPin = Pin;
+        break;
+    end 
+    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+        return;
+    end
+    if( self:GetValue( 'ClassColors' ) ) then
+        WorldMapUnitPin:SetUseClassColor( 'party',true );
+        WorldMapUnitPin:SetUseClassColor( 'raid',true );
+    else
+        WorldMapUnitPin:SetUseClassColor( 'party',false );
+        WorldMapUnitPin:SetUseClassColor( 'raid',false );
+    end
+end
+
+function jMap:WorldMapFramePing()
+    if( self:GetValue( 'Debug' ) ) then
+        Library.FRAMES:Debug( 'WorldMapFramePing' );
+    end
+    if( self.Ticker ) then
+        self.Ticker:Cancel();
+    end
+    local WorldMapUnitPin;
+    local PingInterval = self:GetValue( 'PinPingSeconds' );
+    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+        WorldMapUnitPin = Pin;
+        break;
+    end
+    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+        return;
+    end
+    local function PingMap()
+        if( WorldMapFrame:IsShown() ) then
+            if( self:GetValue( 'PinPing' ) ) then
+                WorldMapUnitPin:StartPlayerPing( 1,self:GetValue( 'PinAnimDuration' ) );
+            else
+                WorldMapUnitPin:StartPlayerPing( 1,0 );
+                WorldMapUnitPin:StopPlayerPing();
+            end
         end
     end
-    self:SetPlayerPingScale( jMap:GetValue( 'PinAnimScale' ) / scale);
+    self.Ticker = C_Timer.NewTicker( PingInterval,function()
+        securecall( function()
+            PingMap();
+        end );
+    end );
+    PingMap();
 end
 
 function jMap:WorldMapFrameOnShow()
@@ -72,9 +162,6 @@ function jMap:WorldMapFrameOnShow()
 end
 
 function jMap:WorldMapFrameCheckShown()
-    if( self:GetValue( 'Debug' ) ) then
-        Library.FRAMES:Debug( 'WorldMapFrameCheckShown' );
-    end
     if( self:GetValue( 'AlwaysShow' ) ) then
         if( self:HasMap() ) then
             if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
@@ -196,59 +283,6 @@ function jMap:SetCVars()
     SetCVar( 'rotateMinimap',Library:BoolToInt( self:GetValue( 'MiniRotate' ) ) );
 end
 
-function jMap:WorldMapFrameUpdatePinColor()
-    -- Player Pin
-    local WorldMapUnitPin;
-    for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = pin
-        break;
-    end
-
-    local SkullPins = {
-        Pink = 'Interface\\WorldMap\\Skull_64Purple',
-        Blue = 'Interface\\WorldMap\\Skull_64Blue',
-        Yellow = 'Interface\\WorldMap\\skull_64',
-        Green = 'Interface\\WorldMap\\Skull_64Green',
-        Grey = 'Interface\\WorldMap\\skull_64grey',
-        Red = 'Interface\\WorldMap\\Skull_64Red',
-        Normal = 'Interface\\WorldMap\\WorldMapArrow',
-    }
-    WorldMapUnitPin:SetPinTexture( 'player',SkullPins[ self:GetValue( 'PinColor' ) ] );
-    local PingWidth,PingHeight = 75,75;
-
-    if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
-        WorldMapUnitPin:SetPlayerPingTexture( Enum.PingTextureType.Rotation,'Interface\\minimap\\UI-Minimap-Ping-Rotate',PingWidth,PingHeight );
-    end
-    --WorldMapUnitPin:SetPinTexture( 'party','Interface\\WorldMap\\Skull_64Grey' );
-    --WorldMapUnitPin:SetPinTexture( 'raid','Interface\\WorldMap\\Skull_64Red' );
-    --WorldMapUnitPin:SetPinTexture( 'party','Interface\\WorldMap\\Skull_64Green' );
-    --WorldMapUnitPin:SetPinTexture( 'party','Interface\\WorldMap\\Skull_64Blue' );
-
-    if( self:GetValue( 'ClassColors' ) ) then
-        WorldMapUnitPin:SetUseClassColor( 'party',true );
-        WorldMapUnitPin:SetUseClassColor( 'raid',true );
-    else
-        WorldMapUnitPin:SetUseClassColor( 'party',false );
-        WorldMapUnitPin:SetUseClassColor( 'raid',false );
-    end
-end
-
-function jMap:WorldMapFramePing()
-    -- Player Pin
-    local WorldMapUnitPin;
-    for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = pin
-        break;
-    end
-
-    if( self:GetValue( 'PinPing' ) ) then
-        WorldMapUnitPin:StartPlayerPing( 1,self:GetValue( 'PinAnimDuration' ) );
-    else
-        WorldMapUnitPin:StartPlayerPing( 1,0 );
-        WorldMapUnitPin:StopPlayerPing();
-    end
-end
-
 function jMap:HasMap()
     if( Library:IsVanilla() ) then
         local Instanced,InstanceType = IsInInstance();
@@ -298,32 +332,25 @@ function jMap:Refresh()
     -- Map Settings
     self:SetCVars();
 
-    -- Map Pin
-    self:WorldMapFrameUpdatePinColor();
-    
-    -- Map Sync
-    self:WorldMapFrameSynchronizeDisplayState();
+    -- Map Player Pin
+    local WorldMapUnitPin;
+    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+        WorldMapUnitPin = Pin;
+        break;
+    end 
+    self:WorldMapFrameUpdatePin();
+
+    -- Map Party Pin
+    self:UpdatePartyPins();
+
+    -- Map Pin Sizes
+    self:WorldMapFrameSynchronizeSizes();
 
     -- Map Show
     self:WorldMapFrameOnShow();
 
     -- Check Show
     self:WorldMapFrameCheckShown();
-
-    -- Continuous
-    if( self.Ticker ) then
-        self.Ticker:Cancel();
-    end
-    self.Ticker = C_Timer.NewTicker( self:GetValue( 'PinPingSeconds' ),function()
-        -- Map Show
-        self:WorldMapFrameCheckShown();
-
-        -- Continue Ping
-        self:WorldMapFramePing();
-    end );
-
-    -- Map Ping
-    self:WorldMapFramePing();
 
     if( self:GetValue( 'Debug' ) ) then
         Library.FRAMES:Debug( 'Done' );
@@ -344,16 +371,19 @@ function jMap:OnEnable()
 
     -- Player Pin
     local WorldMapUnitPin;
-    for pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = pin
+    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+        WorldMapUnitPin = Pin;
         break;
-    end
+    end 
 
     -- Hooks
     self:SecureHook( WorldMapFrame,'SynchronizeDisplayState','WorldMapFrameSynchronizeDisplayState' );
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
+    hooksecurefunc( WorldMapFrame,'OnMapChanged',function( self )
+        jMap:WorldMapFrameUpdatePin();
+    end );
     hooksecurefunc( 'MoveForwardStart',function()
         self:UpdateWorldMapFrameZone();
     end );
