@@ -1,5 +1,13 @@
 local _,Library = ...;
 local jMap = LibStub( 'AceAddon-3.0' ):NewAddon( 'jMap','AceEvent-3.0','AceHook-3.0','AceConsole-3.0' );
+local WorldMapUnitPin;
+for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
+    WorldMapUnitPin = Pin;
+    break;
+end 
+if( not WorldMapFrame or not WorldMapUnitPin ) then
+    return;
+end
 
 function jMap:SetValue( Index,Value )
     return self:SetDBValue( Index,Value );
@@ -18,12 +26,7 @@ function jMap:WorldMapFrameSynchronizeDisplayState()
 end
 
 function jMap:WorldMapFrameSynchronizeSizes()
-    local WorldMapUnitPin;
-    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = Pin;
-        break;
-    end 
-    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+    if( WorldMapUnitPin:IsForbidden() ) then
         return;
     end
     if( jMap:GetValue( 'Debug' ) ) then
@@ -43,15 +46,10 @@ function jMap:WorldMapFrameSynchronizeSizes()
 end
 
 function jMap:WorldMapFrameUpdatePin()
-    local WorldMapUnitPin;
-    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = Pin;
-        break;
-    end 
-    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+    if( WorldMapUnitPin:IsForbidden() ) then
         return;
     end
-    if( self:GetValue( 'Debug' ) ) then
+    if( jMap:GetValue( 'Debug' ) ) then
         Library.FRAMES:Debug( 'WorldMapFrameUpdatePin' );
     end
     if( WorldMapUnitPin.SetPinTexture ) then
@@ -70,12 +68,7 @@ function jMap:WorldMapFrameUpdatePin()
 end
 
 function jMap:UpdatePartyPins()
-    local WorldMapUnitPin;
-    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = Pin;
-        break;
-    end 
-    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+    if( WorldMapUnitPin:IsForbidden() ) then
         return;
     end
     if( self:GetValue( 'ClassColors' ) ) then
@@ -94,13 +87,7 @@ function jMap:WorldMapFramePing()
     if( self.Ticker ) then
         self.Ticker:Cancel();
     end
-    local WorldMapUnitPin;
-    local PingInterval = self:GetValue( 'PinPingSeconds' );
-    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = Pin;
-        break;
-    end
-    if( not WorldMapUnitPin or WorldMapUnitPin:IsForbidden() ) then
+    if( WorldMapUnitPin:IsForbidden() ) then
         return;
     end
     local function PingMap()
@@ -113,6 +100,7 @@ function jMap:WorldMapFramePing()
             end
         end
     end
+    local PingInterval = self:GetValue( 'PinPingSeconds' );
     self.Ticker = C_Timer.NewTicker( PingInterval,function()
         securecall( function()
             PingMap();
@@ -313,10 +301,6 @@ function jMap:OnZoneChanged()
 end
 
 function jMap:Refresh()
-    if( not WorldMapFrame ) then
-        return;
-    end
-    
     if( self:GetValue( 'Debug' ) ) then
         Library.FRAMES:Debug( 'Refreshing all settings...' );
     end
@@ -333,11 +317,6 @@ function jMap:Refresh()
     self:SetCVars();
 
     -- Map Player Pin
-    local WorldMapUnitPin;
-    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = Pin;
-        break;
-    end 
     self:WorldMapFrameUpdatePin();
 
     -- Map Party Pin
@@ -358,9 +337,6 @@ function jMap:Refresh()
 end
 
 function jMap:OnEnable()
-    if( not WorldMapFrame ) then
-        return;
-    end
     WorldMapFrame:SetMovable( true );
     WorldMapFrame:RegisterForDrag( 'LeftButton' );
 
@@ -369,20 +345,13 @@ function jMap:OnEnable()
     self:RegisterEvent( 'ZONE_CHANGED_INDOORS','OnZoneChanged' );
     self:RegisterEvent( 'ZONE_CHANGED','OnZoneChanged' );
 
-    -- Player Pin
-    local WorldMapUnitPin;
-    for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-        WorldMapUnitPin = Pin;
-        break;
-    end 
-
     -- Hooks
     self:SecureHook( WorldMapFrame,'SynchronizeDisplayState','WorldMapFrameSynchronizeDisplayState' );
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
-    hooksecurefunc( WorldMapFrame,'OnMapChanged',function( self )
-        jMap:WorldMapFrameUpdatePin();
+    hooksecurefunc( MapCanvasMixin,'OnMapChanged',function( self )
+        local OK,Message = pcall( jMap.WorldMapFrameUpdatePin );
     end );
     hooksecurefunc( 'MoveForwardStart',function()
         self:UpdateWorldMapFrameZone();
