@@ -13,7 +13,7 @@ if( not WorldMapUnitPin ) then
 end
 
 function jMap:SetValue( Index,Value )
-    return self:SetDBValue( Index,Value );
+    self:SetDBValue( Index,Value );
 end
 
 function jMap:GetValue( Index )
@@ -29,9 +29,6 @@ function jMap:WorldMapFrameSynchronizeDisplayState()
 end
 
 function jMap:WorldMapFrameSynchronizeSizes()
-    if( WorldMapUnitPin:IsForbidden() ) then
-        return;
-    end
     if( jMap:GetValue( 'Debug' ) ) then
         Library.FRAMES:Debug( 'WorldMapFrameSynchronizeSizes' );
     end
@@ -49,9 +46,6 @@ function jMap:WorldMapFrameSynchronizeSizes()
 end
 
 function jMap:WorldMapFrameUpdatePin()
-    if( WorldMapUnitPin:IsForbidden() ) then
-        return;
-    end
     if( jMap:GetValue( 'Debug' ) ) then
         Library.FRAMES:Debug( 'WorldMapFrameUpdatePin' );
     end
@@ -70,10 +64,7 @@ function jMap:WorldMapFrameUpdatePin()
     end
 end
 
-function jMap:UpdatePartyPins()
-    if( WorldMapUnitPin:IsForbidden() ) then
-        return;
-    end
+function jMap:WorldMapFrameUpdatePartyPins()
     if( self:GetValue( 'ClassColors' ) ) then
         WorldMapUnitPin:SetUseClassColor( 'party',true );
         WorldMapUnitPin:SetUseClassColor( 'raid',true );
@@ -84,16 +75,13 @@ function jMap:UpdatePartyPins()
 end
 
 function jMap:WorldMapFramePing()
-    if( self:GetValue( 'Debug' ) ) then
-        Library.FRAMES:Debug( 'WorldMapFramePing' );
-    end
     if( self.Ticker ) then
         self.Ticker:Cancel();
     end
-    if( WorldMapUnitPin:IsForbidden() ) then
-        return;
-    end
     local function PingMap()
+        if( self:GetValue( 'Debug' ) ) then
+            Library.FRAMES:Debug( 'WorldMapFramePing' );
+        end
         if( WorldMapFrame:IsShown() ) then
             if( self:GetValue( 'PinPing' ) ) then
                 WorldMapUnitPin:StartPlayerPing( 1,self:GetValue( 'PinAnimDuration' ) );
@@ -323,7 +311,7 @@ function jMap:Refresh()
     self:WorldMapFrameUpdatePin();
 
     -- Map Party Pin
-    self:UpdatePartyPins();
+    self:WorldMapFrameUpdatePartyPins();
 
     -- Map Pin Sizes
     self:WorldMapFrameSynchronizeSizes();
@@ -353,12 +341,6 @@ function jMap:OnEnable()
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
-    hooksecurefunc( MapCanvasMixin,'OnMapChanged',function( self )
-        jMap:WorldMapFrameUpdatePin();
-    end );
-    hooksecurefunc( 'MoveForwardStart',function()
-        self:UpdateWorldMapFrameZone();
-    end );
 
     -- Position
     WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
