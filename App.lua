@@ -1,11 +1,14 @@
 local _,Library = ...;
 local jMap = LibStub( 'AceAddon-3.0' ):NewAddon( 'jMap','AceEvent-3.0','AceHook-3.0','AceConsole-3.0' );
+if( not WorldMapFrame ) then
+    return;
+end
 local WorldMapUnitPin;
 for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
     WorldMapUnitPin = Pin;
     break;
 end 
-if( not WorldMapFrame or not WorldMapUnitPin ) then
+if( not WorldMapUnitPin ) then
     return;
 end
 
