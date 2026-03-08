@@ -143,8 +143,8 @@ function jMap:WorldMapFrameOnShow()
     -- Map Fade
     local function OnUpdate()
         local Setting = {
-            MinAlpha = jMap:GetValue( 'MapAlpha' ),
-            MaxAlpha = 1.0,
+            MinAlpha = jMap:GetValue( 'MapMinAlpha' ),
+            MaxAlpha = jMap:GetValue( 'MapMaxAlpha' ),
             TimeToMax = 0.1,
         };
         if( WorldMapFrame:IsMouseOver() ) then

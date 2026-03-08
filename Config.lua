@@ -40,13 +40,22 @@ function jMap:GetSettings()
             arg = 'AlwaysShow',
         };
         Order = Order+1;
-        Settings.MapAlpha = {
+        Settings.MapMinAlpha = {
             order = Order,
             type = 'range',
-            name = 'Map Alpha',
-            desc = 'Map transparency/how well you can see behind the map while open',
+            name = 'Map Min Alpha',
+            desc = 'Map Transparency Minimum',
             min = 0.1, max = 1, step = 0.1,
-            arg = 'MapAlpha',
+            arg = 'MapMinAlpha',
+        };
+        Order = Order+1;
+        Settings.MapMaxAlpha = {
+            order = Order,
+            type = 'range',
+            name = 'Map Max Alpha',
+            desc = 'Map Transparency Maximum',
+            min = 0.1, max = 1, step = 0.1,
+            arg = 'MapMaxAlpha',
         };
         Order = Order+1;
         Settings.SitBehind = {

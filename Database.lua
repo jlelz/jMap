@@ -41,7 +41,8 @@ function jMap:InitializeDB()
             MapXPos = 4.584,
             MapYPos = -6.965,
             MapScale = 0.866,
-            MapAlpha = 0.2,
+            MapMinAlpha = 0.2,
+            MapMaxAlpha = 1,
             MapFade = false,
 
             MiniRotate = true,
