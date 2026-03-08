@@ -37,10 +37,10 @@ function jMap:WorldMapFrameSynchronizeSizes()
     if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
         WorldMapUnitPin:SetPlayerPingTexture( Enum.PingTextureType.Rotation,'Interface\\minimap\\UI-Minimap-Ping-Rotate',PingWidth,PingHeight );
     end
-    if( WorldMapUnitPin and WorldMapUnitPin.SetPlayerPingScale ) then
+    if( WorldMapUnitPin.SetPlayerPingScale ) then
         WorldMapUnitPin:SetPlayerPingScale( jMap:GetValue( 'PinAnimScale' )/WorldMapFrame:GetCanvasScale() );
     end
-    if( WorldMapUnitPin and WorldMapUnitPin.SetPinSize ) then
+    if( WorldMapUnitPin.SetPinSize ) then
         WorldMapUnitPin:SetPinSize( PlayerWidth,PlayerHeight );
     end
 end
@@ -351,7 +351,7 @@ function jMap:OnEnable()
     self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
     self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
     hooksecurefunc( MapCanvasMixin,'OnMapChanged',function( self )
-        local OK,Message = pcall( jMap.WorldMapFrameUpdatePin );
+        jMap:WorldMapFrameUpdatePin();
     end );
     hooksecurefunc( 'MoveForwardStart',function()
         self:UpdateWorldMapFrameZone();
