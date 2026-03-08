@@ -56,12 +56,12 @@ function jMap:WorldMapFrameUpdatePin()
     end
     if( WorldMapUnitPin.SetPinTexture ) then
         local SkullPins = {
-            Pink = 'Interface\\WorldMap\\Skull_64Purple',
-            Blue = 'Interface\\WorldMap\\Skull_64Blue',
-            Yellow = 'Interface\\WorldMap\\skull_64',
-            Green = 'Interface\\WorldMap\\Skull_64Green',
-            Grey = 'Interface\\WorldMap\\skull_64grey',
-            Red = 'Interface\\WorldMap\\Skull_64Red',
+            Pink = 'Interface\\WorldMap\\Glowskull_64purple',
+            Blue = 'Interface\\WorldMap\\Glowskull_64blue',
+            Yellow = 'Interface\\WorldMap\\Glowskull_64',
+            Green = 'Interface\\WorldMap\\Glowskull_64green',
+            Grey = 'Interface\\WorldMap\\Glowskull_64grey',
+            Red = 'Interface\\WorldMap\\Glowskull_64red',
             Normal = 'Interface\\WorldMap\\WorldMapArrow',
         }
         WorldMapUnitPin:SetPinTexture( 'player',SkullPins[ jMap:GetValue( 'PinColor' ) ] );
