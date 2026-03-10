@@ -3,12 +3,12 @@ local jMap = LibStub( 'AceAddon-3.0' ):NewAddon( 'jMap','AceEvent-3.0','AceHook-
 if( not WorldMapFrame ) then
     return;
 end
-local WorldMapUnitPin;
+local MainMapPlayerPin;
 for Pin in WorldMapFrame:EnumeratePinsByTemplate( 'GroupMembersPinTemplate' ) do
-    WorldMapUnitPin = Pin;
+    MainMapPlayerPin = Pin;
     break;
 end 
-if( not WorldMapUnitPin ) then
+if( not MainMapPlayerPin ) then
     return;
 end
 
@@ -20,36 +20,19 @@ function jMap:GetValue( Index )
     return self:GetDBValue( Index );
 end
 
-function jMap:WorldMapFrameSynchronizeDisplayState()
-    -- Map Position
-    self:WorldMapFrameSetPosition();
-
-    -- Map Scale
-    self:WorldMapFrameSetScale();
-end
-
-function jMap:WorldMapFrameSynchronizeSizes()
-    if( jMap:GetValue( 'Debug' ) ) then
-        Library.FRAMES:Debug( 'WorldMapFrameSynchronizeSizes' );
-    end
-    local PlayerWidth,PlayerHeight = 64,64;
-    local PingWidth,PingHeight = 75,75;
-    if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
-        WorldMapUnitPin:SetPlayerPingTexture( Enum.PingTextureType.Rotation,'Interface\\minimap\\UI-Minimap-Ping-Rotate',PingWidth,PingHeight );
-    end
-    if( WorldMapUnitPin.SetPlayerPingScale ) then
-        WorldMapUnitPin:SetPlayerPingScale( jMap:GetValue( 'PinAnimScale' )/WorldMapFrame:GetCanvasScale() );
-    end
-    if( WorldMapUnitPin.SetPinSize ) then
-        WorldMapUnitPin:SetPinSize( PlayerWidth,PlayerHeight );
+function jMap:MainMapFrameSetPingSize()
+    if( MainMapPlayerPin.SetPlayerPingScale ) then
+        MainMapPlayerPin:SetPlayerPingScale( jMap:GetValue( 'PinAnimScale' )/WorldMapFrame:GetCanvasScale() );
     end
 end
 
-function jMap:WorldMapFrameUpdatePin()
-    if( jMap:GetValue( 'Debug' ) ) then
-        Library.FRAMES:Debug( 'WorldMapFrameUpdatePin' );
+function jMap:MainMapFrameSetPinTextures()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
     end
-    if( WorldMapUnitPin.SetPinTexture ) then
+
+    -- Pin Texture
+    if( MainMapPlayerPin.SetPinTexture ) then
         local SkullPins = {
             Pink = 'Interface\\WorldMap\\Glowskull_64purple',
             Blue = 'Interface\\WorldMap\\Glowskull_64blue',
@@ -58,41 +41,51 @@ function jMap:WorldMapFrameUpdatePin()
             Grey = 'Interface\\WorldMap\\Glowskull_64grey',
             Red = 'Interface\\WorldMap\\Glowskull_64red',
             Normal = 'Interface\\WorldMap\\WorldMapArrow',
-        }
-        WorldMapUnitPin:SetPinTexture( 'player',SkullPins[ jMap:GetValue( 'PinColor' ) ] );
-        WorldMapUnitPin:SetFrameLevel( 5000 );
+        };
+        MainMapPlayerPin:SetPinTexture( 'player',SkullPins[ jMap:GetValue( 'PinColor' ) ] );
+    end
+
+    -- Ping Texture
+    local PingWidth,PingHeight = 75,75;
+    if( Enum and Enum.PingTextureType and Enum.PingTextureType.Rotation ) then
+        if( MainMapPlayerPin.SetPlayerPingTexture ) then
+            MainMapPlayerPin:SetPlayerPingTexture( Enum.PingTextureType.Rotation,'Interface\\minimap\\UI-Minimap-Ping-Rotate',PingWidth,PingHeight );
+        end
     end
 end
 
-function jMap:WorldMapFrameUpdatePartyPins()
+function jMap:MainMapFrameSetPartyColors()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( self:GetValue( 'ClassColors' ) ) then
-        WorldMapUnitPin:SetUseClassColor( 'party',true );
-        WorldMapUnitPin:SetUseClassColor( 'raid',true );
+        MainMapPlayerPin:SetUseClassColor( 'party',true );
+        MainMapPlayerPin:SetUseClassColor( 'raid',true );
     else
-        WorldMapUnitPin:SetUseClassColor( 'party',false );
-        WorldMapUnitPin:SetUseClassColor( 'raid',false );
+        MainMapPlayerPin:SetUseClassColor( 'party',false );
+        MainMapPlayerPin:SetUseClassColor( 'raid',false );
     end
 end
 
-function jMap:WorldMapFramePing()
-    if( self.Ticker ) then
-        self.Ticker:Cancel();
+function jMap:MainMapFramePing()
+    if( self.PingTicker ) then
+        self.PingTicker:Cancel();
     end
     local function PingMap()
-        if( self:GetValue( 'Debug' ) ) then
-            Library.FRAMES:Debug( 'WorldMapFramePing' );
+        if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+            return;
         end
         if( WorldMapFrame:IsShown() ) then
             if( self:GetValue( 'PinPing' ) ) then
-                WorldMapUnitPin:StartPlayerPing( 1,self:GetValue( 'PinAnimDuration' ) );
+                MainMapPlayerPin:StartPlayerPing( 1,self:GetValue( 'PinAnimDuration' ) );
             else
-                WorldMapUnitPin:StartPlayerPing( 1,0 );
-                WorldMapUnitPin:StopPlayerPing();
+                MainMapPlayerPin:StartPlayerPing( 1,0 );
+                MainMapPlayerPin:StopPlayerPing();
             end
         end
     end
     local PingInterval = self:GetValue( 'PinPingSeconds' );
-    self.Ticker = C_Timer.NewTicker( PingInterval,function()
+    self.PingTicker = C_Timer.NewTicker( PingInterval,function()
         securecall( function()
             PingMap();
         end );
@@ -100,23 +93,9 @@ function jMap:WorldMapFramePing()
     PingMap();
 end
 
-function jMap:WorldMapFrameOnShow()
-    -- Map Sync
-    self:WorldMapFrameSynchronizeDisplayState();
-
-    -- Map Emote
-    if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
-        hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
-            if( self:GetValue( 'StopReading' ) ) then
-                C_ChatInfo.CancelEmote();
-            end
-        end );
-    else
-        hooksecurefunc( 'DoEmote',function( Emote )
-            if( self:GetValue( 'StopReading' ) ) then
-                CancelEmote();
-            end
-       end );
+function jMap:MainMapFrameFade()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
     end
 
     -- Map Fade
@@ -135,12 +114,12 @@ function jMap:WorldMapFrameOnShow()
     FrameFaderDriver = CreateFrame( 'FRAME',nil,WorldMapFrame );
     FrameFaderDriver:HookScript( 'OnUpdate',OnUpdate );
     PlayerMovementFrameFader.RemoveFrame( WorldMapFrame );
-
-    -- Map Ping
-    self:WorldMapFramePing();
 end
 
-function jMap:WorldMapFrameCheckShown()
+function jMap:MainMapFrameCheckShown()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( self:GetValue( 'AlwaysShow' ) ) then
         if( self:HasMap() ) then
             if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
@@ -156,11 +135,10 @@ function jMap:WorldMapFrameCheckShown()
     end
 end
 
-function jMap:WorldMapFrameSetScale()
-    WorldMapFrame:SetScale( self:GetValue( 'MapScale' ) );
-end
-
-function jMap:WorldMapFrameOnMouseWheel( self,Value )
+function jMap:MainMapFrameMouseWheel( self,Value )
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( not jMap:GetValue( 'ScrollScale' ) ) then
         return;
     end
@@ -219,11 +197,14 @@ function jMap:WorldMapFrameOnMouseWheel( self,Value )
     if( NewValue ~= nil ) then
         RangeSlider.EditBox:SetText( NewValue );
         jMap:SetValue( SliderData.Name,NewValue );
-        jMap:WorldMapFrameSetScale();
+        jMap:MainMapFrameSetScale();
     end
 end
 
-function jMap:WorldMapFrameStopMoving()
+function jMap:MainMapFrameStopMoving()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     WorldMapFrame:StopMovingOrSizing();
     if( not( WorldMapFrame:IsMaximized() ) ) then
         local MapPoint,MapRelativeTo,MapRelativePoint,MapXPos,MapYPos = WorldMapFrame:GetPoint();
@@ -238,13 +219,16 @@ function jMap:WorldMapFrameStopMoving()
     WorldMapFrame:SetUserPlaced( true );
 end
 
-function jMap:WorldMapFrameStartMoving()
+function jMap:MainMapFrameStartMoving()
     if( not WorldMapFrame:IsMaximized() ) then
         WorldMapFrame:StartMoving();
     end
 end
 
-function jMap:WorldMapFrameSetPosition()
+function jMap:MainMapFrameSetPosition()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( not( WorldMapFrame:IsMaximized() ) ) then
         local MapPoint,MapXPos,MapYPos = self:GetValue( 'MapPoint' ),self:GetValue( 'MapXPos' ),self:GetValue( 'MapYPos' );
         if( MapXPos ~= nil and MapYPos ~= nil ) then
@@ -254,7 +238,42 @@ function jMap:WorldMapFrameSetPosition()
     end
 end
 
-function jMap:SetCVars()
+function jMap:MainMapFrameEmote()
+    if( C_ChatInfo and C_ChatInfo.PerformEmote ) then
+        hooksecurefunc( C_ChatInfo,'PerformEmote',function( Emote )
+            if( self:GetValue( 'StopReading' ) ) then
+                C_ChatInfo.CancelEmote();
+            end
+        end );
+    else
+        hooksecurefunc( 'DoEmote',function( Emote )
+            if( self:GetValue( 'StopReading' ) ) then
+                CancelEmote();
+            end
+       end );
+    end
+end
+
+function jMap:MainMapFrameSetStrata()
+    local CurrentStrata = WorldMapFrame:GetFrameStrata();
+    if( self:GetValue( 'SitBehind' ) and CurrentStrata ~= 'MEDIUM' ) then
+        WorldMapFrame:SetFrameStrata( 'MEDIUM' );
+    end
+end
+
+function jMap:MainMapFrameSetScale()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
+    if( not( WorldMapFrame:IsMaximized() ) ) then
+        WorldMapFrame:SetScale( self:GetValue( 'MapScale' ) );
+    end
+end
+
+function jMap:MapsSetCVars()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     SetCVar('questLogOpen',Library:BoolToInt( not self:GetValue( 'PanelColapsed' ) ) );
 
     SetCVar( 'mapFade',Library:BoolToInt( self:GetValue( 'MapFade' ) ) );
@@ -263,6 +282,9 @@ function jMap:SetCVars()
 end
 
 function jMap:HasMap()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( Library:IsVanilla() ) then
         local Instanced,InstanceType = IsInInstance();
         if( Instanced ) then
@@ -275,7 +297,10 @@ function jMap:HasMap()
     return true;
 end
 
-function jMap:UpdateWorldMapFrameZone()
+function jMap:MainMapFrameZoneChanged()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( not self:GetValue( 'UpdateWorldMapFrameZone' ) ) then
         return;
     end
@@ -287,40 +312,21 @@ function jMap:UpdateWorldMapFrameZone()
     end
 end
 
-function jMap:OnZoneChanged()
-    self:UpdateWorldMapFrameZone();
-end
-
 function jMap:Refresh()
-    if( self:GetValue( 'Debug' ) ) then
-        Library.FRAMES:Debug( 'Refreshing all settings...' );
-    end
-
-    -- Map Strata
-    local DefaultStrata = WorldMapFrame:GetFrameStrata();
-    if( self:GetValue( 'SitBehind' ) and DefaultStrata ~= 'MEDIUM' ) then
-        WorldMapFrame:SetFrameStrata( 'MEDIUM' );
-    else
-        WorldMapFrame:SetFrameStrata( DefaultStrata );
-    end
-
-    -- Map Settings
-    self:SetCVars();
+    -- Map Scale
+    self:MainMapFrameSetScale();
 
     -- Map Player Pin
-    self:WorldMapFrameUpdatePin();
+    self:MainMapFrameSetPinTextures();
 
     -- Map Party Pin
-    self:WorldMapFrameUpdatePartyPins();
+    self:MainMapFrameSetPartyColors();
 
-    -- Map Pin Sizes
-    self:WorldMapFrameSynchronizeSizes();
-
-    -- Map Show
-    self:WorldMapFrameOnShow();
-
-    -- Check Show
-    self:WorldMapFrameCheckShown();
+    -- Map Strata
+    self:MainMapFrameSetStrata();
+    
+    -- Map Settings
+    self:MapsSetCVars();
 
     if( self:GetValue( 'Debug' ) ) then
         Library.FRAMES:Debug( 'Done' );
@@ -328,26 +334,56 @@ function jMap:Refresh()
 end
 
 function jMap:OnEnable()
+    if( self:GetValue( 'Debug' ) ) then
+        Library.FRAMES:Debug( 'Prepping...please wait' );
+    end
     WorldMapFrame:SetMovable( true );
     WorldMapFrame:RegisterForDrag( 'LeftButton' );
 
     -- Events
-    self:RegisterEvent( 'ZONE_CHANGED_NEW_AREA','OnZoneChanged' );
-    self:RegisterEvent( 'ZONE_CHANGED_INDOORS','OnZoneChanged' );
-    self:RegisterEvent( 'ZONE_CHANGED','OnZoneChanged' );
+    self:RegisterEvent( 'ZONE_CHANGED_NEW_AREA','MainMapFrameZoneChanged' );
+    self:RegisterEvent( 'ZONE_CHANGED_INDOORS','MainMapFrameZoneChanged' );
+    self:RegisterEvent( 'ZONE_CHANGED','MainMapFrameZoneChanged' );
+    self:RegisterEvent( 'PLAYER_REGEN_ENABLED','MainMapFrameCheckShown' );
+    self:RegisterEvent( 'PLAYER_REGEN_DISABLED',function()
+        if( WorldMapFrame:IsShown() ) then
+            WorldMapFrame:Hide();
+        end
+    end );
 
     -- Hooks
-    self:SecureHook( WorldMapFrame,'SynchronizeDisplayState','WorldMapFrameSynchronizeDisplayState' );
-    self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','WorldMapFrameOnMouseWheel' );
-    self:SecureHook( WorldMapUnitPin,'SynchronizePinSizes','WorldMapFrameSynchronizeSizes' );
-    self:SecureHookScript( WorldMapFrame,'OnShow','WorldMapFrameOnShow' );
+    self:SecureHook( WorldMapFrame,'SynchronizeDisplayState',function()
+        -- Map Scale
+        self:MainMapFrameSetScale();
 
-    -- Position
-    WorldMapFrame:HookScript( 'OnDragStart',self.WorldMapFrameStartMoving );
-    WorldMapFrame:HookScript( 'OnDragStop',self.WorldMapFrameStopMoving );
+        -- Map Position
+        self:MainMapFrameSetPosition();
 
-    -- Refresh
+        -- Map Zone
+        self:MainMapFrameZoneChanged();
+
+        -- Map Emote
+        self:MainMapFrameEmote();
+    end );
+    self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','MainMapFrameMouseWheel' );
+    self:SecureHook( MainMapPlayerPin,'SynchronizePinSizes','MainMapFrameSetPingSize' );
+    self:SecureHookScript( WorldMapFrame,'OnShow',function()
+        -- Map Fade
+        self:MainMapFrameFade();
+
+        -- Map Ping
+        self:MainMapFramePing();
+    end );
+
+    -- Map Movement
+    WorldMapFrame:HookScript( 'OnDragStart',self.MainMapFrameStartMoving );
+    WorldMapFrame:HookScript( 'OnDragStop',self.MainMapFrameStopMoving );
+
+    -- Map Refresh
     self:Refresh();
+
+    -- Map Show
+    self:MainMapFrameCheckShown();
 end
 
 function jMap:ConfigOpen( Input )
