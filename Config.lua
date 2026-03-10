@@ -35,8 +35,8 @@ function jMap:GetSettings()
         Settings.AlwaysShow = {
             order = Order,
             type = 'toggle',
-            name = 'Always Show Map',
-            desc = 'Whether or not the map should remain open at all times',
+            name = 'Attempt Keep Open',
+            desc = 'Whether or not the map should attempt to stay open. There are caveats, such as in combat or in player housing',
             arg = 'AlwaysShow',
         };
         Order = Order+1;
