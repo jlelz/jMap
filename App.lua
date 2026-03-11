@@ -21,6 +21,9 @@ function jMap:GetValue( Index )
 end
 
 function jMap:MainMapFrameSetPingSize()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( MainMapPlayerPin.SetPlayerPingScale ) then
         MainMapPlayerPin:SetPlayerPingScale( jMap:GetValue( 'PinAnimScale' )/WorldMapFrame:GetCanvasScale() );
     end
@@ -220,6 +223,9 @@ function jMap:MainMapFrameStopMoving()
 end
 
 function jMap:MainMapFrameStartMoving()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     if( not WorldMapFrame:IsMaximized() ) then
         WorldMapFrame:StartMoving();
     end
@@ -255,6 +261,9 @@ function jMap:MainMapFrameEmote()
 end
 
 function jMap:MainMapFrameSetStrata()
+    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
+        return;
+    end
     local CurrentStrata = WorldMapFrame:GetFrameStrata();
     if( self:GetValue( 'SitBehind' ) and CurrentStrata ~= 'MEDIUM' ) then
         WorldMapFrame:SetFrameStrata( 'MEDIUM' );
@@ -282,9 +291,6 @@ function jMap:MapsSetCVars()
 end
 
 function jMap:HasMap()
-    if( ( Library:IsRetail() and InCombatLockdown() ) ) then
-        return;
-    end
     if( Library:IsVanilla() ) then
         local Instanced,InstanceType = IsInInstance();
         if( Instanced ) then
@@ -345,7 +351,7 @@ function jMap:OnEnable()
     self:RegisterEvent( 'ZONE_CHANGED_INDOORS','MainMapFrameZoneChanged' );
     self:RegisterEvent( 'ZONE_CHANGED','MainMapFrameZoneChanged' );
     self:RegisterEvent( 'PLAYER_REGEN_ENABLED','MainMapFrameCheckShown' );
-    self:RegisterEvent( 'PLAYER_REGEN_DISABLED',function()
+    self:RegisterEvent( 'PLAYER_REGEN_DISABLED',function( self,Event )
         if( WorldMapFrame:IsShown() ) then
             WorldMapFrame:Hide();
         end

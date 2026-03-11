@@ -21,6 +21,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      # --- NEW LINTING STEPS ---
+      - name: Run Luacheck
+        uses: lunarmodules/luacheck@v1
+        with:
+          args: . # Lints the entire project directory
+      # -------------------------
+
       # Package and release the retail version
       - name: Create Retail Package
         uses: BigWigsMods/packager@v2
