@@ -352,8 +352,10 @@ function jMap:OnEnable()
     self:RegisterEvent( 'ZONE_CHANGED','MainMapFrameZoneChanged' );
     self:RegisterEvent( 'PLAYER_REGEN_ENABLED','MainMapFrameCheckShown' );
     self:RegisterEvent( 'PLAYER_REGEN_DISABLED',function( self,Event )
-        if( WorldMapFrame:IsShown() ) then
-            WorldMapFrame:Hide();
+        if( Event == 'PLAYER_REGEN_DISABLED' ) then
+            if( WorldMapFrame:IsShown() ) then
+                WorldMapFrame:Hide();
+            end
         end
     end );
 
