@@ -322,6 +322,9 @@ function jMap:Refresh()
     -- Map Scale
     self:MainMapFrameSetScale();
 
+    -- Map Ping Pin
+    self:MainMapFrameSetPingSize();
+
     -- Map Player Pin
     self:MainMapFrameSetPinTextures();
 
@@ -382,8 +385,6 @@ function jMap:OnEnable()
         -- Map Ping
         self:MainMapFramePing();
     end );
-
-    -- Map Movement
     WorldMapFrame:HookScript( 'OnDragStart',self.MainMapFrameStartMoving );
     WorldMapFrame:HookScript( 'OnDragStop',self.MainMapFrameStopMoving );
 
