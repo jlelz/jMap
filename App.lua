@@ -316,6 +316,9 @@ function jMap:MainMapFrameZoneChanged()
     if( CurrentZone ) then
         WorldMapFrame:SetMapID( CurrentZone );
     end
+    
+    -- Map Show
+    self:MainMapFrameCheckShown();
 end
 
 function jMap:Refresh()
