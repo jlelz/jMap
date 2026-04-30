@@ -127,7 +127,9 @@ function jMap:MainMapFrameCheckShown()
         if( self:HasMap() ) then
             if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
                 if( not self.WorldMapFrameClosed ) then
-                    WorldMapFrame:Show();
+                    C_Timer.After( 3,function()
+                        WorldMapFrame:Show();
+                    end );
                 end
             end
         else
