@@ -47,6 +47,7 @@ function jMap:InitializeDB()
 
             MiniRotate = true,
 
+            PinScale = 1,
             PinAnimDuration = 10,
             PinAnimScale = 1.5,
             PinPing = true,

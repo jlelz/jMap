@@ -46,6 +46,7 @@ function jMap:MainMapFrameSetPinTextures()
             Normal = 'Interface\\WorldMap\\WorldMapArrow',
         };
         MainMapPlayerPin:SetPinTexture( 'player',SkullPins[ jMap:GetValue( 'PinColor' ) ] );
+        MainMapPlayerPin:SetScale( jMap:GetValue( 'PinScale' ) );
     end
 
     -- Ping Texture

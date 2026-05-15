@@ -179,6 +179,15 @@ function jMap:GetSettings()
             min = 1, max = 3, step = 0.5,
             arg = 'PinAnimScale',
         };
+        Order = Order+1;
+        Settings.PinScale = {
+            order = Order,
+            type = 'range',
+            name = 'Pin Scale',
+            desc = 'Pin scale',
+            min = 1, max = 3, step = 0.5,
+            arg = 'PinScale',
+        };
         -- /Interface/FrameXML/UnitPositionFrameTemplates.lua
         return Settings;
     end
