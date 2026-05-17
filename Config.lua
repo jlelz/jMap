@@ -36,7 +36,7 @@ function jMap:GetSettings()
             order = Order,
             type = 'toggle',
             name = 'Attempt Keep Open',
-            desc = 'Whether or not the map should attempt to stay open. There are caveats, such as in combat or in player housing',
+            desc = 'Whether or not the map should attempt to stay open. There may be caveats, such as in player housing',
             arg = 'AlwaysShow',
         };
         Order = Order+1;
