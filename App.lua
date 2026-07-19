@@ -215,6 +215,15 @@ function jMap:MainMapFrameStopMoving()
     if( not( WorldMapFrame:IsMaximized() ) ) then
         local MapPoint,MapRelativeTo,MapRelativePoint,MapXPos,MapYPos = WorldMapFrame:GetPoint();
         if( MapXPos ~= nil and MapYPos ~= nil ) then
+            if( jMap:GetValue( 'Debug' ) ) then
+                Library:Dump( {
+                    MapPoint = MapPoint,
+                    MapRelativeTo = MapRelativeTo,
+                    MapRelativePoint = MapRelativePoint,
+                    MapXPos = MapXPos,
+                    MapYPos = MapYPos,
+                } );
+            end
             jMap:SetValue( 'MapPoint',MapPoint );
             jMap:SetValue( 'MapRelativeTo',MapRelativeTo );
             jMap:SetValue( 'MapRelativePoint',MapRelativePoint );
@@ -242,7 +251,11 @@ function jMap:MainMapFrameSetPosition()
         local MapPoint,MapXPos,MapYPos = self:GetValue( 'MapPoint' ),self:GetValue( 'MapXPos' ),self:GetValue( 'MapYPos' );
         if( MapXPos ~= nil and MapYPos ~= nil ) then
             WorldMapFrame:ClearAllPoints();
-            WorldMapFrame:SetPoint( MapPoint,MapXPos,MapYPos );
+
+            if( self:GetValue( 'Debug' ) ) then
+                print( 'Setting Map to',MapPoint,MapXPos,MapYPos );
+            end
+            WorldMapFrame:SetPoint( MapPoint,MapRelativeTo,MapRelativePoint,MapXPos,MapYPos );
         end
     end
 end
@@ -375,6 +388,12 @@ function jMap:OnEnable()
         -- Map Emote
         self:MainMapFrameEmote();
     end );
+
+    if( not Library:IsRetail() ) then
+        -- Map Position
+        self:MainMapFrameSetPosition();
+    end
+
     self:SecureHookScript( WorldMapFrame.ScrollContainer,'OnMouseWheel','MainMapFrameMouseWheel' );
     self:SecureHook( MainMapPlayerPin,'SynchronizePinSizes','MainMapFrameSetPingSize' );
     self:SecureHookScript( WorldMapFrame,'OnShow',function()
