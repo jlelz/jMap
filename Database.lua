@@ -68,7 +68,6 @@ function jMap:InitializeDB()
         Defaults.global.PinScale = 2;
         Defaults.global.PinAnimScale = 1;
     end
-    Library:Dump( Defaults );
 
     self.db = LibStub( 'AceDB-3.0' ):New( self:GetName(),Defaults,'global' );
 
