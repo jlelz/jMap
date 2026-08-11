@@ -69,8 +69,8 @@ function jMap:GetSettings()
         Settings.UpdateWorldMapFrameZone = {
             order = Order,
             type = 'toggle',
-            name = 'Auto Update Zone',
-            desc = 'Attempt to transition map to new zone automatically. Retail has known issues with this, as it seems to cause some errors',
+            name = 'Movement Update Zone',
+            desc = 'Attempt to transition map to new zone automatically, during movement',
             arg = 'UpdateWorldMapFrameZone',
         };
         Order = Order+1;

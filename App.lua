@@ -374,6 +374,12 @@ function jMap:OnEnable()
     self:RegisterEvent( 'ZONE_CHANGED','MainMapFrameZoneChanged' );
     self:RegisterEvent( 'PLAYER_REGEN_ENABLED','MainMapFrameCheckShown' );
 
+    --[[
+    self:RegisterEvent( 'PLAYER_STARTED_MOVING','MainMapFrameZoneChanged' );
+    self:RegisterEvent( 'PLAYER_STARTED_LOOKING','MainMapFrameZoneChanged' );
+    self:RegisterEvent( 'PLAYER_STARTED_TURNING','MainMapFrameZoneChanged' );
+    ]]
+
     -- Hooks
     self:SecureHook( WorldMapFrame,'SynchronizeDisplayState',function()
         -- Map Scale
