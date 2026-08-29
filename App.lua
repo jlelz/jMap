@@ -124,10 +124,10 @@ function jMap:MainMapFrameCheckShown()
     if( ( Library:IsRetail() and InCombatLockdown() ) ) then
         return;
     end
-    if( self:GetValue( 'AlwaysShow' ) ) then
-        if( self:HasMap() ) then
-            if( not WorldMapFrame:IsShown() and self:GetValue( 'AlwaysShow' ) ) then
-                if( not self.WorldMapFrameClosed ) then
+    if( jMap:GetValue( 'AlwaysShow' ) ) then
+        if( jMap:HasMap() ) then
+            if( not WorldMapFrame:IsShown() ) then
+                if( not jMap.WorldMapFrameClosed ) then
                     C_Timer.After( 3,function()
                         WorldMapFrame:Show();
                     end );
@@ -332,9 +332,6 @@ function jMap:MainMapFrameZoneChanged()
     if( CurrentZone ) then
         WorldMapFrame:SetMapID( CurrentZone );
     end
-    
-    -- Map Show
-    self:MainMapFrameCheckShown();
 end
 
 function jMap:Refresh()
@@ -372,7 +369,6 @@ function jMap:OnEnable()
     self:RegisterEvent( 'ZONE_CHANGED_NEW_AREA','MainMapFrameZoneChanged' );
     self:RegisterEvent( 'ZONE_CHANGED_INDOORS','MainMapFrameZoneChanged' );
     self:RegisterEvent( 'ZONE_CHANGED','MainMapFrameZoneChanged' );
-    self:RegisterEvent( 'PLAYER_REGEN_ENABLED','MainMapFrameCheckShown' );
 
     --[[
     self:RegisterEvent( 'PLAYER_STARTED_MOVING','MainMapFrameZoneChanged' );
@@ -411,6 +407,7 @@ function jMap:OnEnable()
     end );
     WorldMapFrame:HookScript( 'OnDragStart',self.MainMapFrameStartMoving );
     WorldMapFrame:HookScript( 'OnDragStop',self.MainMapFrameStopMoving );
+    WorldMapFrame:HookScript( 'OnHide',self.MainMapFrameCheckShown );
 
     -- Map Refresh
     self:Refresh();
