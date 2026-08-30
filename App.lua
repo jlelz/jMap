@@ -405,9 +405,9 @@ function jMap:OnEnable()
         -- Map Ping
         self:MainMapFramePing();
     end );
-    WorldMapFrame:HookScript( 'OnDragStart',self.MainMapFrameStartMoving );
-    WorldMapFrame:HookScript( 'OnDragStop',self.MainMapFrameStopMoving );
-    WorldMapFrame:HookScript( 'OnHide',self.MainMapFrameCheckShown );
+    self:SecureHookScript( WorldMapFrame,'OnDragStart','MainMapFrameStartMoving' );
+    self:SecureHookScript( WorldMapFrame,'OnDragStop','MainMapFrameStopMoving' );
+    self:SecureHookScript( WorldMapFrame,'OnHide','MainMapFrameCheckShown' );
 
     -- Map Refresh
     self:Refresh();
