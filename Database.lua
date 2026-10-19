@@ -47,7 +47,7 @@ function jMap:InitializeDB()
 
             MiniRotate = true,
 
-            PinScale = 1,
+            PinScale = 1.5,
             PinAnimDuration = 10,
             PinAnimScale = 1.5,
             PinPing = true,
@@ -63,11 +63,6 @@ function jMap:InitializeDB()
             Debug = false,
         },
     };
-
-    if( not Library:IsRetail() ) then
-        Defaults.global.PinScale = 2;
-        Defaults.global.PinAnimScale = 1;
-    end
 
     self.db = LibStub( 'AceDB-3.0' ):New( self:GetName(),Defaults,'global' );
 
