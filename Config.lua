@@ -208,7 +208,7 @@ function jMap:GetSettings()
             end
         end,
         name = 'jMap Settings',
-        childGroups = 'tab',
+        childGroups = 'tree',
         args = {},
     };
 
@@ -248,11 +248,11 @@ function jMap:GetSettings()
 end
 
 function jMap:RegisterSettings()
-    LibStub( 'AceConfig-3.0' ):RegisterOptionsTable( self:GetName(),self:GetSettings() );
+    LibStub( 'AceConfigRegistry-3.0' ):RegisterOptionsTable( self:GetName(),self:GetSettings() );
 end
 
 function jMap:AddToBlizOptions()
-    _,self.CategoryID = LibStub( 'AceConfigDialog-3.0' ):AddToBlizOptions( self:GetName(),self:GetName() );
+    self.optionsFrame = LibStub( 'AceConfigDialog-3.0' ):AddToBlizOptions( self:GetName(),self:GetName() );
 end
 
 function jMap:InitializeConfig()

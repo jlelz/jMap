@@ -414,21 +414,14 @@ function jMap:OnEnable()
     self:MainMapFrameCheckShown();
 end
 
-function jMap:ConfigOpen( Input )
-    if( not Input or Input:trim() == "" ) then
-
-        if( InterfaceOptionsFrame_OpenToCategory ) then
-            InterfaceOptionsFrame_OpenToCategory( self.CategoryID );
-        else
-            Settings.OpenToCategory( self.CategoryID );
-        end
-    else
-        self:Print( 'Command:',Input );
-    end
+function jMap:OpenConfig( Input )
+    LibStub( 'AceConfigDialog-3.0' ):Open( self:GetName() )
 end
 
 function jMap:OnInitialize()
     self:InitializeDB();
     self:InitializeConfig();
-    self:RegisterChatCommand( 'jm','ConfigOpen' );
+
+    self:RegisterChatCommand( 'jm','OpenConfig' )
+    self:RegisterChatCommand( 'jmap','OpenConfig' )
 end

@@ -1,7 +1,7 @@
 ## Title: |cff009bffj|cffffffffMap|r
 ## Notes: j's Map mod
 ## Version: @project-version@
-## X-Category: system
+## Category: Hud & Display
 
 ## Author: jlelz
 ## X-Realm: Moonguard/Grobbulus/Whitemane
