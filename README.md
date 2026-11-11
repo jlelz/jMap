@@ -21,14 +21,11 @@ https://github.com/jlelz/jMap/issues
 
 ## Screenshots
 <p float="center">
-  <img src="https://i.imgur.com/WJ11RTj.png" width="500" />
+  <img src="https://github.com/jlelz/screens/blob/main/wow/jMap/1.png?raw=true" width="500" />
 </p>
 <p float="center">
-  <img src="https://i.imgur.com/x7oF5mr.png" width="500" />
+  <img src="https://github.com/jlelz/screens/blob/main/wow/jMap/2.png?raw=true" width="500" />
 </p>
 <p float="center">
-  <img src="https://i.imgur.com/k3o8NIp.png" width="500" />
-</p>
-<p float="center">
-  <img src="https://i.imgur.com/SZ1U0e1.png" width="500" />
+  <img src="https://github.com/jlelz/screens/blob/main/wow/jMap/3.png?raw=true" width="500" />
 </p>

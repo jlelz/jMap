@@ -207,7 +207,7 @@ function jMap:GetSettings()
                 end
             end
         end,
-        name = 'jMap Settings',
+        name = self:GetName(),
         childGroups = 'tree',
         args = {},
     };
